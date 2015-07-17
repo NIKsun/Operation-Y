@@ -12,6 +12,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.TextView;
 
 
 /**
@@ -50,6 +51,7 @@ public class CreateRequestActivity extends Activity implements View.OnClickListe
     private SystemUiHider mSystemUiHider;
 
     Button buttonSearch;
+    TextView request;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,7 +87,10 @@ public class CreateRequestActivity extends Activity implements View.OnClickListe
         switch (v.getId()) {
             case R.id.buttonSearch:
                 Intent intent = new Intent(this, ListOfCars.class);
+                TextView request = (TextView) findViewById(R.id.editTextRequest);
+                intent.putExtra("request",request.getText().toString());
                 startActivity(intent);
+
                 break;
             default:
                 break;
