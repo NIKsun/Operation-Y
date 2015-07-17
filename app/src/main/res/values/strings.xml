@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">SearchMyCarAndroid</string>
 
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="dummy_button">Поиск</string>
+    <string name="dummy_content">Auto.ru\nHelper</string>
 </resources>

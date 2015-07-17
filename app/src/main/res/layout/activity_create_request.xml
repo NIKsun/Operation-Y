@@ -22,11 +22,17 @@
             android:background="@color/black_overlay" android:orientation="horizontal"
             tools:ignore="UselessParent">
 
-            <Button android:id="@+id/dummy_button" style="?metaButtonBarButtonStyle"
+            <Button android:id="@+id/buttonSearch" style="?metaButtonBarButtonStyle"
                 android:layout_width="0dp" android:layout_height="wrap_content"
                 android:layout_weight="1" android:text="@string/dummy_button" />
 
         </LinearLayout>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="143dp"
+            android:id="@+id/editTextRequest"
+            android:layout_gravity="left|top" />
     </FrameLayout>
 
 </FrameLayout>
