@@ -1,8 +1,12 @@
 package com.example.searchmycarandroid;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Parcelable;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -13,13 +17,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class ListViewAdapter extends BaseAdapter{
-    String [] texts;
+    String [] textsAndRefs;
     Context context;
     Bitmap[] images;
     private static LayoutInflater inflater=null;
-    public ListViewAdapter(ListOfCars mainActivity, String[] prgmNameList, Bitmap[] prgmImages) {
+    public ListViewAdapter(ListOfCars mainActivity, String[] prgmList, Bitmap[] prgmImages) {
         // TODO Auto-generated constructor stub
-        texts=prgmNameList;
+        textsAndRefs=prgmList;
         context=mainActivity;
         images=prgmImages;
         inflater = ( LayoutInflater )context.
@@ -28,7 +32,7 @@ public class ListViewAdapter extends BaseAdapter{
     @Override
     public int getCount() {
         // TODO Auto-generated method stub
-        return texts.length;
+        return images.length;
     }
 
     @Override
@@ -56,14 +60,22 @@ public class ListViewAdapter extends BaseAdapter{
         rowView = inflater.inflate(R.layout.listview, null);
         holder.tv=(TextView) rowView.findViewById(R.id.textView1);
         holder.img=(ImageView) rowView.findViewById(R.id.imageView1);
-        holder.tv.setText(Html.fromHtml(texts[position]));
-
+        holder.tv.setText(Html.fromHtml(textsAndRefs[position+getCount()]));
+        holder.tv.setLinksClickable(true);
         holder.img.setImageBitmap(images[position]);
+
+        /*
+        tvContent.setLinksClickable(true);
+        tvContent.setMovementMethod(new LinkMovementMethod());
+        */
+
         rowView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                Toast.makeText(context, "You Clicked at position " + position, Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(context,CarPage.class);
+                intent.putExtra("url",textsAndRefs[position]);
+                context.startActivity(intent);
             }
         });
         return rowView;

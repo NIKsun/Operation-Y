@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -30,8 +31,6 @@ import java.util.List;
 
 
 public class ListOfCars extends Activity {
-    ListOfCars loc = this;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +40,7 @@ public class ListOfCars extends Activity {
         f.execute();
     }
     class MyTask extends AsyncTask<Void, Void, Void> {
-        String[] texts;
+        String[] textsAndRefs;
         String[] imagesRef;
         Bitmap[] images;
         String s_data = "", request = getIntent().getStringExtra("request");
@@ -80,16 +79,17 @@ public class ListOfCars extends Activity {
 
             String[] autoInfoArr = s_data.split("@@@");
 
-            images = new Bitmap[autoInfoArr.length/2];
-            imagesRef = new String[autoInfoArr.length/2];
-            texts = new String[autoInfoArr.length/2];
+            images = new Bitmap[autoInfoArr.length/3];
+            imagesRef = new String[autoInfoArr.length/3];
+            textsAndRefs = new String[(autoInfoArr.length/3)*2];
 
             Bitmap LoadingImage = BitmapFactory.decodeResource(getResources(),R.drawable.res);
-            for(int i=0;i<autoInfoArr.length;i+=2)
+            for(int i=0;i<autoInfoArr.length;i+=3)
             {
-                imagesRef[i/2] = autoInfoArr[i];
-                texts[i/2] = autoInfoArr[i+1];
-                images[i/2] = LoadingImage;
+                textsAndRefs[i/3] = autoInfoArr[i];
+                imagesRef[i/3] = autoInfoArr[i+1];
+                textsAndRefs[i/3+(autoInfoArr.length/3)] = autoInfoArr[i+2];
+                images[i/3] = LoadingImage;
             }
             return null;
         }
@@ -102,7 +102,7 @@ public class ListOfCars extends Activity {
             pb.setVisibility(View.INVISIBLE);
 
             ListView lv=(ListView)findViewById(R.id.listView);
-            lv.setAdapter(new ListViewAdapter(loc, texts, images));
+            lv.setAdapter(new ListViewAdapter(ListOfCars.this, textsAndRefs, images));
             for(int i=0;i<images.length;i++)
             {
                 LoadImage li = new LoadImage();
