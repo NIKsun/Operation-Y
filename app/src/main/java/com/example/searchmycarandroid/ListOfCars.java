@@ -3,8 +3,10 @@ package com.example.searchmycarandroid;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -40,7 +42,8 @@ public class ListOfCars extends Activity {
     }
     class MyTask extends AsyncTask<Void, Void, Void> {
         String[] texts;
-        String[] images;
+        String[] imagesRef;
+        Bitmap[] images;
         String s_data = "", request = getIntent().getStringExtra("request");
         Bitmap bm;
 
@@ -77,12 +80,16 @@ public class ListOfCars extends Activity {
 
             String[] autoInfoArr = s_data.split("@@@");
 
-            images = new String[autoInfoArr.length/2];
+            images = new Bitmap[autoInfoArr.length/2];
+            imagesRef = new String[autoInfoArr.length/2];
             texts = new String[autoInfoArr.length/2];
+
+            Bitmap LoadingImage = BitmapFactory.decodeResource(getResources(),R.drawable.res);
             for(int i=0;i<autoInfoArr.length;i+=2)
             {
-                images[i/2] = autoInfoArr[i];
+                imagesRef[i/2] = autoInfoArr[i];
                 texts[i/2] = autoInfoArr[i+1];
+                images[i/2] = LoadingImage;
             }
             return null;
         }
@@ -96,7 +103,39 @@ public class ListOfCars extends Activity {
 
             ListView lv=(ListView)findViewById(R.id.listView);
             lv.setAdapter(new ListViewAdapter(loc, texts, images));
+            for(int i=0;i<images.length;i++)
+            {
+                LoadImage li = new LoadImage();
+                li.execute(i);
+            }
 
+
+        }
+
+        class LoadImage extends AsyncTask<Integer, Void, Integer> {
+            Bitmap bm;
+
+            @Override
+            protected void onPreExecute() {
+            }
+
+            @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+            @Override
+            protected Integer doInBackground(Integer... params) {
+                try {
+                    bm = BitmapFactory.decodeStream((InputStream) new URL(imagesRef[params[0]]).getContent());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return params[0];
+            }
+
+            @Override
+            protected void onPostExecute(Integer result) {
+                images[result] = bm;
+                ListView lv=(ListView)findViewById(R.id.listView);
+                lv.invalidateViews();
+            }
 
         }
     }
