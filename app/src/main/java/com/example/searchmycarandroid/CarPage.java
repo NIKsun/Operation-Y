@@ -23,9 +23,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.sql.Time;
 
-/**
- * Created by Никита on 18.07.2015.
- */
+
 public class CarPage extends Activity{
     private WebView mWebView;
 

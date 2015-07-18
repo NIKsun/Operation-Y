@@ -3,6 +3,8 @@ package com.example.searchmycarandroid;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,11 +12,13 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -31,19 +35,25 @@ import java.util.List;
 
 
 public class ListOfCars extends Activity {
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.listofcars);
-        MyTask f=new MyTask();
+        LoadListView loader = new LoadListView();
         Context context = this;
-        f.execute();
+        loader.execute();
     }
-    class MyTask extends AsyncTask<Void, Void, Void> {
+
+    public void onClickStart(View v) {
+        startService(new Intent(this, MonitoringService.class));
+    }
+
+    class LoadListView extends AsyncTask<Void, Void, Void> {
         String[] textsAndRefs;
         String[] imagesRef;
         Bitmap[] images;
-        String s_data = "", request = getIntent().getStringExtra("request");
+        String s_data = "";
         Bitmap bm;
 
         @Override
@@ -57,7 +67,8 @@ public class ListOfCars extends Activity {
         @TargetApi(Build.VERSION_CODES.HONEYCOMB)
         @Override
         protected Void doInBackground(Void... params) {
-
+            SharedPreferences sPref = PreferenceManager.getDefaultSharedPreferences(ListOfCars.this);
+            final String request = sPref.getString("SearchMyCarRequest", "");
             Socket soc = null;
             try {
                 soc = new Socket();
@@ -79,18 +90,24 @@ public class ListOfCars extends Activity {
 
             String[] autoInfoArr = s_data.split("@@@");
 
-            images = new Bitmap[autoInfoArr.length/3];
-            imagesRef = new String[autoInfoArr.length/3];
-            textsAndRefs = new String[(autoInfoArr.length/3)*2];
+            int countOfCars = (autoInfoArr.length-1)/3;
+            images = new Bitmap[countOfCars];
+            imagesRef = new String[countOfCars];
+            textsAndRefs = new String[countOfCars*2];
 
-            Bitmap LoadingImage = BitmapFactory.decodeResource(getResources(),R.drawable.res);
-            for(int i=0;i<autoInfoArr.length;i+=3)
+            Bitmap LoadingImage = BitmapFactory.decodeResource(getResources(), R.drawable.res);
+            for(int i=0;i<autoInfoArr.length-1;i+=3)
             {
                 textsAndRefs[i/3] = autoInfoArr[i];
                 imagesRef[i/3] = autoInfoArr[i+1];
-                textsAndRefs[i/3+(autoInfoArr.length/3)] = autoInfoArr[i+2];
+                textsAndRefs[i/3+countOfCars] = autoInfoArr[i+2];
                 images[i/3] = LoadingImage;
             }
+
+            SharedPreferences.Editor ed = sPref.edit();
+            ed.putString("SearchMyCarLastCarID", autoInfoArr[autoInfoArr.length-1]);
+            ed.commit();
+
             return null;
         }
 

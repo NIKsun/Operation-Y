@@ -32,7 +32,8 @@
             android:layout_width="match_parent"
             android:layout_height="143dp"
             android:id="@+id/editTextRequest"
-            android:layout_gravity="left|top" />
+            android:layout_gravity="left|top"
+            android:text="http://auto.ru/cars/chevrolet/lacetti/used/?sort%5Bcreate_date%5D=desc" />
     </FrameLayout>
 
 </FrameLayout>
