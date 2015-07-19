@@ -2,58 +2,99 @@ package com.example.searchmycarandroid;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.text.Html;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 
 public class ListOfCars extends Activity {
-    Toast toast;
+    Toast toastError;
+    AlertDialog.Builder ad;
+    String lastCarID;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.listofcars);
         LoadListView loader = new LoadListView();
-        Context context = this;
-        loader.execute();
-        toast = Toast.makeText(getApplicationContext(),
+
+
+
+        SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+        String request = sPref.getString("SearchMyCarRequest", "");
+        Intent intent = getIntent();
+
+        if(intent.getExtras() != null && intent.getExtras().isEmpty() == false){
+            request = sPref.getString("SearchMyCarRequestService", "");
+            intent.getExtras().clear();
+        }
+
+        Log.d("BugWithService:OnCreacteReq", request);
+
+        loader.execute(request);
+        toastError = Toast.makeText(getApplicationContext(),
                 "Связь с сервером не установлена :(", Toast.LENGTH_SHORT);
+
+
+        ad = new AlertDialog.Builder(ListOfCars.this);
+        ad.setTitle("Запустить мониторинг?");
+        ad.setMessage("Будут приходить уведомления о поступлении новых авто.\nМожно запустить только один мониторинг.");
+        ad.setPositiveButton("Запустить новый монитор", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int arg1) {
+
+                SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+                SharedPreferences.Editor ed = sPref.edit();
+                stopService(new Intent(ListOfCars.this, MonitoringService.class));
+                String request = sPref.getString("SearchMyCarRequest", "");
+                ed.putString("SearchMyCarRequestService", request);
+                ed.putString("SearchMyCarLastCarID", lastCarID);
+                ed.commit();
+
+                startService(new Intent(ListOfCars.this, MonitoringService.class));
+
+                Toast.makeText(ListOfCars.this, "Новый монитор запущен", Toast.LENGTH_SHORT).show();
+            }
+        });
+        ad.setNegativeButton("Остановить старый монитор", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int arg1) {
+                stopService(new Intent(ListOfCars.this, MonitoringService.class));
+                Toast.makeText(ListOfCars.this, "Монитор остановлен.", Toast.LENGTH_SHORT).show();
+            }
+        });
+        ad.setCancelable(true);
+        ad.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            public void onCancel(DialogInterface dialog) {
+                Toast.makeText(ListOfCars.this, "Вы не изменили параметры мониторинга", Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
     public void onClickStart(View v) {
-        startService(new Intent(this, MonitoringService.class));
+        ad.show();
     }
 
-    class LoadListView extends AsyncTask<Void, Void, Boolean> {
+    class LoadListView extends AsyncTask<String, Void, Boolean> {
         String[] textsAndRefs;
         String[] imagesRef;
         Bitmap[] images;
@@ -70,14 +111,14 @@ public class ListOfCars extends Activity {
 
         @TargetApi(Build.VERSION_CODES.HONEYCOMB)
         @Override
-        protected Boolean doInBackground(Void... params) {
-            SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-            final String request = sPref.getString("SearchMyCarRequest", "");
+        protected Boolean doInBackground(String... params) {
+
+
             Socket soc = new Socket();
             try {
                 soc.connect(new InetSocketAddress(InetAddress.getByName("193.124.59.57"), 11111));
                 soc.setKeepAlive(true);
-                soc.getOutputStream().write(request.getBytes());
+                soc.getOutputStream().write(params[0].getBytes());
                 int r = 0;
                 byte[] buf = new byte[64 * 1024];
                 while(true) {
@@ -93,7 +134,7 @@ public class ListOfCars extends Activity {
 
             if(soc.isConnected() == false)
             {
-                toast.show();
+                toastError.show();
                 finish();
                 return false;
             }
@@ -113,16 +154,9 @@ public class ListOfCars extends Activity {
                 textsAndRefs[i/3+countOfCars] = autoInfoArr[i+2];
                 images[i/3] = LoadingImage;
             }
-
-            SharedPreferences.Editor ed = sPref.edit();
-            Log.d("BugWithService",autoInfoArr[autoInfoArr.length-1]);
-            ed.putString("SearchMyCarLastCarID", autoInfoArr[autoInfoArr.length-1]);
-            ed.commit();
-
+            lastCarID = autoInfoArr[autoInfoArr.length - 1];
             return true;
         }
-
-
         @Override
         protected void onPostExecute(Boolean result) {
             super.onPostExecute(result);
@@ -156,7 +190,6 @@ public class ListOfCars extends Activity {
                 }
                 return params[0];
             }
-
             @Override
             protected void onPostExecute(Integer result) {
                 images[result] = bm;

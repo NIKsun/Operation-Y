@@ -1,7 +1,6 @@
 package com.example.searchmycarandroid;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -13,7 +12,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.net.InetAddress;
@@ -27,39 +25,47 @@ public class MonitoringService extends Service {
     String lastCarId;
     byte[] reqByte;
 
+    Thread t = new Thread(new Runnable() {
+        @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+        public void run() {
+            try {
+                ServiceProcess();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    });
+
     public void onCreate() {
         super.onCreate();
         nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
     }
-    public int onStartCommand(Intent intent, int flags, int startId) {        
-        Thread t = new Thread(new Runnable() {
-            @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-            public void run() {
-                try {
-                    someTask();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+    public int onStartCommand(Intent intent, int flags, int startId) {
+
+        SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+        request = sPref.getString("SearchMyCarRequestService", "");
         t.start();
+
         return START_STICKY;
     }
+
     public void onDestroy() {
+        request=null;
         super.onDestroy();
+        Log.d("BugWithService:ServiceDestroy", "ServiceDestroy");
     }
     public IBinder onBind(Intent intent) {
         return null;
     }
 
 
-    void someTask() throws InterruptedException {
+    void ServiceProcess() throws InterruptedException {
         for (int i = 1; i<=100; i++) {
-
+            TimeUnit.SECONDS.sleep(10);
+            if(request == null)
+                return;
             SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-            request = sPref.getString("SearchMyCarRequest", "");
-            lastCarId = sPref.getString("SearchMyCarLastCarID", "");
-            Log.d("BugWithService:Service1",lastCarId);
+            lastCarId = sPref.getString("SearchMyCarLastCarID","");
             final String complexRequest =  request + "@@@" + lastCarId;
             final String[] answer = {""};            
             Thread t = new Thread(new Runnable() {
@@ -86,8 +92,7 @@ public class MonitoringService extends Service {
             t.start();
             while (t.isAlive())
                 continue;
-
-            Log.d("BugWithService:Service2",lastCarId);
+            Log.d("BugWithService:ServiceProcess2",answer[0]);
             if(Integer.parseInt(answer[0]) != 0) {
                 sendNotification(answer[0]);
             }
@@ -99,6 +104,8 @@ public class MonitoringService extends Service {
         Notification notif = new Notification(R.drawable.status_bar, "Новое авто!",
                 System.currentTimeMillis());
         Intent intent = new Intent(this, ListOfCars.class);
+        intent.putExtra("ServiceRequest", request);
+        Log.d("BugWithService:sendNotification", request);
         PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
         if(countOfNewCars == "1")

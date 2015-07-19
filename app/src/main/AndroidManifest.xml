@@ -32,6 +32,9 @@
             android:label="@string/app_name"
             android:theme="@android:style/Theme.NoTitleBar" >
         </activity>
+        <activity
+            android:name=".NotificationActivity">
+        </activity>
         <service android:name=".MonitoringService"
             android:enabled="true"
             android:exported="true">

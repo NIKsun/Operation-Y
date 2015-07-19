@@ -3,10 +3,7 @@ package com.example.searchmycarandroid;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.Uri;
-import android.os.Parcelable;
 import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -14,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class ListViewAdapter extends BaseAdapter{
     String [] textsAndRefs;
@@ -63,11 +59,6 @@ public class ListViewAdapter extends BaseAdapter{
         holder.tv.setText(Html.fromHtml(textsAndRefs[position+getCount()]));
         holder.tv.setLinksClickable(true);
         holder.img.setImageBitmap(images[position]);
-
-        /*
-        tvContent.setLinksClickable(true);
-        tvContent.setMovementMethod(new LinkMovementMethod());
-        */
 
         rowView.setOnClickListener(new OnClickListener() {
             @Override
