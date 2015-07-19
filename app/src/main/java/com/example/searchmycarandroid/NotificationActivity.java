@@ -8,8 +8,9 @@ import android.os.Bundle;
 import android.util.Log;
 
 /**
- * Created by Никита on 19.07.2015.
+ * Created by РќРёРєРёС‚Р° on 19.07.2015.
  */
+
 public class NotificationActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

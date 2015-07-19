@@ -12,7 +12,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
-import android.util.Log;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -46,8 +45,6 @@ public class MonitoringService extends Service {
         request = sPref.getString("SearchMyCarRequestService", "");
         t.start();
 
-        Log.d("Service:onStartCommand", request);
-
         return START_STICKY;
     }
 
@@ -62,15 +59,13 @@ public class MonitoringService extends Service {
 
     void ServiceProcess() throws InterruptedException {
         for (int i = 1; i<=100; i++) {
-            TimeUnit.SECONDS.sleep(10);
+            TimeUnit.SECONDS.sleep(60);
             if(request == null)
                 return;
             SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
             lastCarId = sPref.getString("SearchMyCarLastCarID","");
             final String complexRequest =  request + "@@@" + lastCarId;
             final String[] answer = {""};
-
-            Log.d("BugWithService:ServiceProcess", request);
 
             Thread t = new Thread(new Runnable() {
                 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -96,10 +91,9 @@ public class MonitoringService extends Service {
             t.start();
             while (t.isAlive())
                 continue;
-            Log.d("BugWithService:ServiceProcess2", answer[0]);
-            //if(Integer.parseInt(answer[0]) != 0) {
+            if(Integer.parseInt(answer[0]) != 0) {
                 sendNotification(answer[0]);
-            //}
+            }
         }
     }
 
@@ -110,6 +104,10 @@ public class MonitoringService extends Service {
 
         Intent intent = new Intent(this, NotificationActivity.class);
         PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+        SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+        sPref.edit().putInt("SearchMyCarCountOfNewCars", Integer.parseInt(countOfNewCars));
+        sPref.edit().commit();
 
         if(countOfNewCars == "1")
             notif.setLatestEventInfo(this, "SearchMyAuto", "Найдено "+countOfNewCars+" новый авто", pIntent);

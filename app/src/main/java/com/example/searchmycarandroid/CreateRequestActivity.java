@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
@@ -33,6 +32,7 @@ public class CreateRequestActivity extends Activity implements View.OnClickListe
                 SharedPreferences.Editor ed = sPref.edit();
                 ed.putString("SearchMyCarRequest", request.getText().toString());
                 ed.putBoolean("SearchMyCarIsFromService", false);
+                ed.putInt("SearchMyCarCountOfNewCars", 0);
                 ed.commit();
                 startActivity(intent);
 

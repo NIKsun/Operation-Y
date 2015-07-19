@@ -3,6 +3,7 @@ package com.example.searchmycarandroid;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,12 +17,15 @@ public class ListViewAdapter extends BaseAdapter{
     String [] textsAndRefs;
     Context context;
     Bitmap[] images;
+    int countOfNewCars;
+
     private static LayoutInflater inflater=null;
-    public ListViewAdapter(ListOfCars mainActivity, String[] prgmList, Bitmap[] prgmImages) {
+    public ListViewAdapter(ListOfCars mainActivity, String[] prgmList, Bitmap[] prgmImages, int count) {
         // TODO Auto-generated constructor stub
         textsAndRefs=prgmList;
         context=mainActivity;
         images=prgmImages;
+        countOfNewCars=count;
         inflater = ( LayoutInflater )context.
                 getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
@@ -54,6 +58,10 @@ public class ListViewAdapter extends BaseAdapter{
         Holder holder=new Holder();
         View rowView;
         rowView = inflater.inflate(R.layout.listview, null);
+
+        if(position<countOfNewCars)    //New cars
+            rowView.setBackgroundColor(Color.rgb(255,230,230));
+
         holder.tv=(TextView) rowView.findViewById(R.id.textView1);
         holder.img=(ImageView) rowView.findViewById(R.id.imageView1);
         holder.tv.setText(Html.fromHtml(textsAndRefs[position+getCount()]));

@@ -13,7 +13,6 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -51,7 +50,6 @@ public class ListOfCars extends Activity {
                 SharedPreferences.Editor ed = sPref.edit();
                 stopService(new Intent(ListOfCars.this, MonitoringService.class));
                 String request = sPref.getString("SearchMyCarRequest", "");
-                Log.d("Service",request);
 
                 ed.putString("SearchMyCarRequestService", request);
                 ed.putString("SearchMyCarLastCarID", lastCarID);
@@ -77,7 +75,6 @@ public class ListOfCars extends Activity {
 
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         String request = sPref.getString("SearchMyCarRequest", "");
-        Log.d("Service:execute", request);
         loader.execute(request);
     }
 
@@ -152,6 +149,7 @@ public class ListOfCars extends Activity {
             {
                 SharedPreferences.Editor ed = sPref.edit();
                 ed.putString("SearchMyCarLastCarID", lastCarID);
+                ed.commit();
             }
             return true;
         }
@@ -163,7 +161,8 @@ public class ListOfCars extends Activity {
                 pb.setVisibility(View.INVISIBLE);
 
                 ListView lv = (ListView) findViewById(R.id.listView);
-                lv.setAdapter(new ListViewAdapter(ListOfCars.this, textsAndRefs, images));
+                lv.setAdapter(new ListViewAdapter(ListOfCars.this, textsAndRefs, images, 0));
+
                 for (int i = 0; i < images.length; i++) {
                     LoadImage li = new LoadImage();
                     li.execute(i);
