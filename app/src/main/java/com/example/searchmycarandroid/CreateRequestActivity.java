@@ -32,6 +32,7 @@ public class CreateRequestActivity extends Activity implements View.OnClickListe
                 SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
                 SharedPreferences.Editor ed = sPref.edit();
                 ed.putString("SearchMyCarRequest", request.getText().toString());
+                ed.putBoolean("SearchMyCarIsFromService", false);
                 ed.commit();
                 startActivity(intent);
 

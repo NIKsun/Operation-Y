@@ -46,13 +46,14 @@ public class MonitoringService extends Service {
         request = sPref.getString("SearchMyCarRequestService", "");
         t.start();
 
+        Log.d("Service:onStartCommand", request);
+
         return START_STICKY;
     }
 
     public void onDestroy() {
         request=null;
         super.onDestroy();
-        Log.d("BugWithService:ServiceDestroy", "ServiceDestroy");
     }
     public IBinder onBind(Intent intent) {
         return null;
@@ -67,7 +68,10 @@ public class MonitoringService extends Service {
             SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
             lastCarId = sPref.getString("SearchMyCarLastCarID","");
             final String complexRequest =  request + "@@@" + lastCarId;
-            final String[] answer = {""};            
+            final String[] answer = {""};
+
+            Log.d("BugWithService:ServiceProcess", request);
+
             Thread t = new Thread(new Runnable() {
                 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
                 public void run() {
@@ -92,10 +96,10 @@ public class MonitoringService extends Service {
             t.start();
             while (t.isAlive())
                 continue;
-            Log.d("BugWithService:ServiceProcess2",answer[0]);
-            if(Integer.parseInt(answer[0]) != 0) {
+            Log.d("BugWithService:ServiceProcess2", answer[0]);
+            //if(Integer.parseInt(answer[0]) != 0) {
                 sendNotification(answer[0]);
-            }
+            //}
         }
     }
 
@@ -103,9 +107,8 @@ public class MonitoringService extends Service {
 
         Notification notif = new Notification(R.drawable.status_bar, "Новое авто!",
                 System.currentTimeMillis());
-        Intent intent = new Intent(this, ListOfCars.class);
-        intent.putExtra("ServiceRequest", request);
-        Log.d("BugWithService:sendNotification", request);
+
+        Intent intent = new Intent(this, NotificationActivity.class);
         PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
         if(countOfNewCars == "1")

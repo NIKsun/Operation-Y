@@ -38,23 +38,8 @@ public class ListOfCars extends Activity {
         setContentView(R.layout.listofcars);
         LoadListView loader = new LoadListView();
 
-
-
-        SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-        String request = sPref.getString("SearchMyCarRequest", "");
-        Intent intent = getIntent();
-
-        if(intent.getExtras() != null && intent.getExtras().isEmpty() == false){
-            request = sPref.getString("SearchMyCarRequestService", "");
-            intent.getExtras().clear();
-        }
-
-        Log.d("BugWithService:OnCreacteReq", request);
-
-        loader.execute(request);
         toastError = Toast.makeText(getApplicationContext(),
                 "Связь с сервером не установлена :(", Toast.LENGTH_SHORT);
-
 
         ad = new AlertDialog.Builder(ListOfCars.this);
         ad.setTitle("Запустить мониторинг?");
@@ -66,6 +51,8 @@ public class ListOfCars extends Activity {
                 SharedPreferences.Editor ed = sPref.edit();
                 stopService(new Intent(ListOfCars.this, MonitoringService.class));
                 String request = sPref.getString("SearchMyCarRequest", "");
+                Log.d("Service",request);
+
                 ed.putString("SearchMyCarRequestService", request);
                 ed.putString("SearchMyCarLastCarID", lastCarID);
                 ed.commit();
@@ -88,6 +75,10 @@ public class ListOfCars extends Activity {
             }
         });
 
+        SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+        String request = sPref.getString("SearchMyCarRequest", "");
+        Log.d("Service:execute", request);
+        loader.execute(request);
     }
 
     public void onClickStart(View v) {
@@ -155,6 +146,13 @@ public class ListOfCars extends Activity {
                 images[i/3] = LoadingImage;
             }
             lastCarID = autoInfoArr[autoInfoArr.length - 1];
+            SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+            Boolean IsFromService = sPref.getBoolean("SearchMyCarIsFromService", false);
+            if(IsFromService)
+            {
+                SharedPreferences.Editor ed = sPref.edit();
+                ed.putString("SearchMyCarLastCarID", lastCarID);
+            }
             return true;
         }
         @Override
