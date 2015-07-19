@@ -60,7 +60,7 @@ public class ListViewAdapter extends BaseAdapter{
         rowView = inflater.inflate(R.layout.listview, null);
 
         if(position<countOfNewCars)    //New cars
-            rowView.setBackgroundColor(Color.rgb(255,230,230));
+            rowView.setBackgroundColor(0xFFC1E1FF);
 
         holder.tv=(TextView) rowView.findViewById(R.id.textView1);
         holder.img=(ImageView) rowView.findViewById(R.id.imageView1);

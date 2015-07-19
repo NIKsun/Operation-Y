@@ -59,7 +59,7 @@ public class MonitoringService extends Service {
 
     void ServiceProcess() throws InterruptedException {
         for (int i = 1; i<=100; i++) {
-            TimeUnit.SECONDS.sleep(60);
+            TimeUnit.SECONDS.sleep(120);
             if(request == null)
                 return;
             SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
@@ -106,8 +106,9 @@ public class MonitoringService extends Service {
         PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-        sPref.edit().putInt("SearchMyCarCountOfNewCars", Integer.parseInt(countOfNewCars));
-        sPref.edit().commit();
+        SharedPreferences.Editor ed = sPref.edit();
+        ed.putInt("SearchMyCarCountOfNewCars", Integer.parseInt(countOfNewCars));
+        ed.commit();
 
         if(countOfNewCars == "1")
             notif.setLatestEventInfo(this, "SearchMyAuto", "Найдено "+countOfNewCars+" новый авто", pIntent);

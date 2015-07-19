@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -161,7 +162,8 @@ public class ListOfCars extends Activity {
                 pb.setVisibility(View.INVISIBLE);
 
                 ListView lv = (ListView) findViewById(R.id.listView);
-                lv.setAdapter(new ListViewAdapter(ListOfCars.this, textsAndRefs, images, 0));
+                SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+                lv.setAdapter(new ListViewAdapter(ListOfCars.this, textsAndRefs, images, sPref.getInt("SearchMyCarCountOfNewCars", 0)));
 
                 for (int i = 0; i < images.length; i++) {
                     LoadImage li = new LoadImage();

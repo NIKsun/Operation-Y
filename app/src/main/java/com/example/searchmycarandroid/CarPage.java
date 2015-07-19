@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import java.net.URL;
+
 
 public class CarPage extends Activity{
     private WebView mWebView;

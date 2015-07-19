@@ -19,9 +19,11 @@ public class NotificationActivity extends Activity {
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         SharedPreferences.Editor ed = sPref.edit();
         String request = sPref.getString("SearchMyCarRequestService", "");
-        Log.d("Service:NotificationActivity",request);
+        Log.d("Service:NotificationActivity", request);
         ed.putString("SearchMyCarRequest", request);
         ed.putBoolean("SearchMyCarIsFromService", true);
+        Integer a = sPref.getInt("SearchMyCarCountOfNewCars", 0);
+        Log.d("Style", a.toString());
         ed.commit();
         startActivity(intent);
         finish();
