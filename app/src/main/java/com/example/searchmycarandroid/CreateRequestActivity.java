@@ -4,6 +4,7 @@ import com.example.searchmycarandroid.util.SystemUiHider;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 /**
@@ -91,7 +93,7 @@ public class CreateRequestActivity extends Activity implements View.OnClickListe
                 Intent intent = new Intent(this, ListOfCars.class);
                 TextView request = (TextView) findViewById(R.id.editTextRequest);
 
-                SharedPreferences sPref = PreferenceManager.getDefaultSharedPreferences(this);
+                SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
                 SharedPreferences.Editor ed = sPref.edit();
                 ed.putString("SearchMyCarRequest", request.getText().toString());
                 ed.commit();

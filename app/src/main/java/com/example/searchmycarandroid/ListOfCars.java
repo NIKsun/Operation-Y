@@ -23,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,10 +33,11 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 public class ListOfCars extends Activity {
-
+    Toast toast;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,13 +45,15 @@ public class ListOfCars extends Activity {
         LoadListView loader = new LoadListView();
         Context context = this;
         loader.execute();
+        toast = Toast.makeText(getApplicationContext(),
+                "Связь с сервером не установлена :(", Toast.LENGTH_SHORT);
     }
 
     public void onClickStart(View v) {
         startService(new Intent(this, MonitoringService.class));
     }
 
-    class LoadListView extends AsyncTask<Void, Void, Void> {
+    class LoadListView extends AsyncTask<Void, Void, Boolean> {
         String[] textsAndRefs;
         String[] imagesRef;
         Bitmap[] images;
@@ -66,26 +70,32 @@ public class ListOfCars extends Activity {
 
         @TargetApi(Build.VERSION_CODES.HONEYCOMB)
         @Override
-        protected Void doInBackground(Void... params) {
-            SharedPreferences sPref = PreferenceManager.getDefaultSharedPreferences(ListOfCars.this);
+        protected Boolean doInBackground(Void... params) {
+            SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
             final String request = sPref.getString("SearchMyCarRequest", "");
-            Socket soc = null;
+            Socket soc = new Socket();
             try {
-                soc = new Socket();
-                soc.bind(null);
-                soc.connect(new InetSocketAddress(InetAddress.getByName("192.168.43.238"), 11111));
+                soc.connect(new InetSocketAddress(InetAddress.getByName("193.124.59.57"), 11111));
                 soc.setKeepAlive(true);
                 soc.getOutputStream().write(request.getBytes());
                 int r = 0;
                 byte[] buf = new byte[64 * 1024];
-                do {
+                while(true) {
                     r = soc.getInputStream().read(buf);
+                    if(r == -1)
+                        break;
                     s_data += new String(buf, 0, r);
                 }
-                while (r != 0);
             }
             catch (Exception e) {
                 e.printStackTrace();
+            }
+
+            if(soc.isConnected() == false)
+            {
+                toast.show();
+                finish();
+                return false;
             }
 
             String[] autoInfoArr = s_data.split("@@@");
@@ -105,28 +115,28 @@ public class ListOfCars extends Activity {
             }
 
             SharedPreferences.Editor ed = sPref.edit();
+            Log.d("BugWithService",autoInfoArr[autoInfoArr.length-1]);
             ed.putString("SearchMyCarLastCarID", autoInfoArr[autoInfoArr.length-1]);
             ed.commit();
 
-            return null;
+            return true;
         }
 
 
         @Override
-        protected void onPostExecute(Void result) {
+        protected void onPostExecute(Boolean result) {
             super.onPostExecute(result);
-            ProgressBar pb = (ProgressBar)findViewById(R.id.progressBar);
-            pb.setVisibility(View.INVISIBLE);
+            if(result) {
+                ProgressBar pb = (ProgressBar) findViewById(R.id.progressBar);
+                pb.setVisibility(View.INVISIBLE);
 
-            ListView lv=(ListView)findViewById(R.id.listView);
-            lv.setAdapter(new ListViewAdapter(ListOfCars.this, textsAndRefs, images));
-            for(int i=0;i<images.length;i++)
-            {
-                LoadImage li = new LoadImage();
-                li.execute(i);
+                ListView lv = (ListView) findViewById(R.id.listView);
+                lv.setAdapter(new ListViewAdapter(ListOfCars.this, textsAndRefs, images));
+                for (int i = 0; i < images.length; i++) {
+                    LoadImage li = new LoadImage();
+                    li.execute(i);
+                }
             }
-
-
         }
 
         class LoadImage extends AsyncTask<Integer, Void, Integer> {

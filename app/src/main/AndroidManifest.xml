@@ -34,8 +34,7 @@
         </activity>
         <service android:name=".MonitoringService"
             android:enabled="true"
-            android:exported="true"
-            android:process=":newproc">
+            android:exported="true">
         </service>
     </application>
 
