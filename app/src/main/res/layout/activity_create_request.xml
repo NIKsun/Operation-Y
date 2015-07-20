@@ -34,6 +34,30 @@
             android:id="@+id/editTextRequest"
             android:layout_gravity="left|top"
             android:text="http://auto.ru/cars/vaz/all/?search%5Bsection_id%5D=0&amp;search%5Bmark%5D%5B0%5D=288&amp;search%5Bmark-folder%5D%5B0%5D=288-0&amp;search%5Bsalon_id%5D=&amp;search%5Byear%5D%5Bmin%5D=&amp;search%5Byear%5D%5Bmax%5D=&amp;search%5Bprice%5D%5Bmin%5D=&amp;search%5Bprice%5D%5Bmax%5D=&amp;search%5Bengine_volume%5D%5Bmin%5D=&amp;search%5Bengine_volume%5D%5Bmax%5D=&amp;search%5Brun%5D%5Bmax%5D=&amp;search%5Bengine_power%5D%5Bmin%5D=&amp;search%5Bengine_power%5D%5Bmax%5D=&amp;search%5Bcustom%5D=1&amp;search%5Bacceleration%5D%5Bmin%5D=&amp;search%5Bacceleration%5D%5Bmax%5D=&amp;search%5Bstate%5D=1&amp;search%5Bgeo_region%5D=&amp;search%5Bgeo_city%5D=&amp;search%5Bgeo_country%5D=&amp;search%5Bgeo_similar_cities%5D=&amp;search%5Bperiod%5D=0&amp;sort%5Bcreate_date%5D=desc&amp;show_sales=1" />
+
     </FrameLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Марка"
+            android:id="@+id/marka_button"
+            android:layout_gravity="center_horizontal"
+            android:onClick="onClick"
+            />
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Модель"
+            android:id="@+id/model_button"
+            android:layout_gravity="center_horizontal"
+            android:onClick="onClick"
+            />
+    </LinearLayout>
 
 </FrameLayout>
