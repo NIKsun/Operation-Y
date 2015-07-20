@@ -4,10 +4,19 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#ffffff">
-        <WebView  xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/webview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+    android:background="#ffffff"
+    android:id="@+id/mainlayout">
+
+    <WebView  xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    <ProgressBar
+        android:indeterminateDrawable="@drawable/spinner"
+        android:indeterminateOnly="true"
+        android:layout_width="118dp"
+        android:layout_height="118dp"
+        android:id="@+id/progressBarWeb"
+        android:layout_gravity="center" />
 
 </FrameLayout>

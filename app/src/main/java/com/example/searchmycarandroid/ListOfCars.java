@@ -88,7 +88,6 @@ public class ListOfCars extends Activity {
         String[] imagesRef;
         Bitmap[] images;
         String s_data = "";
-        Bitmap bm;
 
         @Override
         protected void onPreExecute() {

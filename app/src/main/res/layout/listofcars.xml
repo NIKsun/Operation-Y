@@ -21,19 +21,20 @@
 
         <Button android:id="@+id/buttonSearch"
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="Мониторинг"
+            android:text="Начать мониторинг"
             android:background="#ff2276a3"    android:onClick="onClickStart"
             android:textSize="19dp"
             android:textColor="#ffffffff"
             android:elegantTextHeight="false"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp" />
+            android:paddingTop="15dp"
+            android:paddingBottom="15dp"
+            android:layout_gravity="top" />
 
         <ListView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/listView"
-            android:layout_gravity="center_horizontal|top" />
+            android:layout_gravity="center_horizontal|" />
 
     </LinearLayout>
 </FrameLayout>
