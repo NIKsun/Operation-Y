@@ -4,6 +4,7 @@
     <file url="file://$PROJECT_DIR$/app/src/main/java/com/example/searchmycarandroid/CarPage.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/src/main/java/com/example/searchmycarandroid/CreateRequestActivity.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/src/main/java/com/example/searchmycarandroid/ListOfCars.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/com/example/searchmycarandroid/ListOfMarkActivity.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/src/main/java/com/example/searchmycarandroid/MonitoringService.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/src/main/java/com/example/searchmycarandroid/NotificationActivity.java" charset="UTF-8" />
   </component>

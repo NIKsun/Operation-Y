@@ -3,4 +3,8 @@
 
     <string name="dummy_button">Поиск</string>
     <string name="dummy_content">Auto.ru\nHelper</string>
+    <string name="title_activity_list_of_mark">ListOfMarkActivity</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
 </resources>
