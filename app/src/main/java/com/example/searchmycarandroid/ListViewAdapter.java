@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,25 +15,25 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 public class ListViewAdapter extends BaseAdapter{
-    String [] textsAndRefs;
     Context context;
+    Cars cars;
     Bitmap[] images;
     int countOfNewCars;
 
     private static LayoutInflater inflater=null;
-    public ListViewAdapter(ListOfCars mainActivity, String[] prgmList, Bitmap[] prgmImages, int count) {
+    public ListViewAdapter(ListOfCars mainActivity, Cars c, Bitmap[] imgs, int count) {
         // TODO Auto-generated constructor stub
-        textsAndRefs=prgmList;
         context=mainActivity;
-        images=prgmImages;
         countOfNewCars=count;
+        images = imgs;
+        cars = c;
         inflater = ( LayoutInflater )context.
                 getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
     @Override
     public int getCount() {
         // TODO Auto-generated method stub
-        return images.length;
+        return cars.getLenth();
     }
 
     @Override
@@ -64,7 +65,7 @@ public class ListViewAdapter extends BaseAdapter{
 
         holder.tv=(TextView) rowView.findViewById(R.id.textView1);
         holder.img=(ImageView) rowView.findViewById(R.id.imageView1);
-        holder.tv.setText(Html.fromHtml(textsAndRefs[position+getCount()]));
+        holder.tv.setText(Html.fromHtml(cars.getMessage(position)));
         holder.tv.setLinksClickable(true);
         holder.img.setImageBitmap(images[position]);
 
@@ -73,7 +74,7 @@ public class ListViewAdapter extends BaseAdapter{
             public void onClick(View v) {
                 // TODO Auto-generated method stub
                 Intent intent = new Intent(context,CarPage.class);
-                intent.putExtra("url",textsAndRefs[position]);
+                intent.putExtra("url",cars.getHref(position));
                 context.startActivity(intent);
             }
         });

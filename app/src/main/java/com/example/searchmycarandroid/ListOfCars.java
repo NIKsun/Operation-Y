@@ -13,11 +13,16 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +34,7 @@ import java.util.List;
 
 
 public class ListOfCars extends Activity {
-    Toast toastError;
+    Toast toastErrorConnection, toastErrorCarList;
     AlertDialog.Builder ad;
     String lastCarID;
     @Override
@@ -38,8 +43,10 @@ public class ListOfCars extends Activity {
         setContentView(R.layout.listofcars);
         LoadListView loader = new LoadListView();
 
-        toastError = Toast.makeText(getApplicationContext(),
+        toastErrorConnection = Toast.makeText(getApplicationContext(),
                 "Связь с сервером не установлена :(", Toast.LENGTH_SHORT);
+        toastErrorCarList = Toast.makeText(getApplicationContext(),
+                "По вашему запросу ничего не найдено", Toast.LENGTH_SHORT);
 
         ad = new AlertDialog.Builder(ListOfCars.this);
         ad.setTitle("Запустить мониторинг?");
@@ -83,7 +90,7 @@ public class ListOfCars extends Activity {
         ad.show();
     }
 
-    class LoadListView extends AsyncTask<String, Void, Boolean> {
+    class LoadListView extends AsyncTask<String, Void, Cars> {
         String[] textsAndRefs;
         String[] imagesRef;
         Bitmap[] images;
@@ -99,10 +106,10 @@ public class ListOfCars extends Activity {
 
         @TargetApi(Build.VERSION_CODES.HONEYCOMB)
         @Override
-        protected Boolean doInBackground(String... params) {
+        protected Cars doInBackground(String... params) {
 
 
-            Socket soc = new Socket();
+            /*Socket soc = new Socket();
             try {
                 soc.connect(new InetSocketAddress(InetAddress.getByName("193.124.59.57"), 11111));
                 soc.setKeepAlive(true);
@@ -150,25 +157,73 @@ public class ListOfCars extends Activity {
                 SharedPreferences.Editor ed = sPref.edit();
                 ed.putString("SearchMyCarLastCarID", lastCarID);
                 ed.commit();
+            }*/
+
+            Cars cars = null;
+            try {
+                Document doc;
+                doc  = Jsoup.connect(params[0]).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").get();
+                Elements mainElems  =  doc.select("body > div.branding_fix > div.content.content_style > article > div.clearfix > div.b-page-wrapper > div.b-page-content").first().children();
+
+
+                Log.i("Vizant1", String.valueOf(mainElems.size()));
+
+                Elements listOfCars = null;
+                for(int i=0;i<mainElems.size();i++)
+                {
+                    String className = mainElems.get(i).className();
+                    if((className.indexOf("widget widget_theme_white sales-list") == 0) && (className.length() == 36)){
+                        Log.i("Vizant34", className);
+                        listOfCars = mainElems.get(i).select("div.sales-list-item");
+                        break;
+                    }
+                }
+                if(listOfCars == null)
+                {
+                    Log.i("Vizant1","empty");
+                    toastErrorCarList.show();
+                    return null;
+                }
+                Log.i("Vizant2", "Now");
+
+                cars = new Cars(listOfCars.size());
+                Bitmap LoadingImage = BitmapFactory.decodeResource(getResources(), R.drawable.res);
+                images = new Bitmap[listOfCars.size()];
+                for(int i=0;i<listOfCars.size();i++)
+                {
+                    images[i] = LoadingImage;
+                    cars.addFromAutoRu(listOfCars.get(i).select("table > tbody > tr").first());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                toastErrorConnection.show();
+                return null;
             }
-            return true;
+            return cars;
         }
         @Override
-        protected void onPostExecute(Boolean result) {
+        protected void onPostExecute(Cars result) {
+            Log.i("Vizant2", "Now2");
             super.onPostExecute(result);
-            if(result) {
-                ProgressBar pb = (ProgressBar) findViewById(R.id.progressBar);
-                pb.setVisibility(View.INVISIBLE);
+            ProgressBar pb = (ProgressBar) findViewById(R.id.progressBar);
+            pb.setVisibility(View.INVISIBLE);
 
-                ListView lv = (ListView) findViewById(R.id.listView);
-                SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-                lv.setAdapter(new ListViewAdapter(ListOfCars.this, textsAndRefs, images, sPref.getInt("SearchMyCarCountOfNewCars", 0)));
-
-                for (int i = 0; i < images.length; i++) {
-                    LoadImage li = new LoadImage();
-                    li.execute(i);
-                }
+            if(result == null) {
+                finish();
+                return;
             }
+
+            ListView lv = (ListView) findViewById(R.id.listView);
+            SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+            lv.setAdapter(new ListViewAdapter(ListOfCars.this, result, images, sPref.getInt("SearchMyCarCountOfNewCars", 0)));
+
+            imagesRef = new String[result.getLenth()];
+            for (int i = 0; i < result.getLenth(); i++) {
+                imagesRef[i] = result.getImg(i);
+                LoadImage li = new LoadImage();
+                li.execute(i);
+            }
+
         }
 
         class LoadImage extends AsyncTask<Integer, Void, Integer> {
