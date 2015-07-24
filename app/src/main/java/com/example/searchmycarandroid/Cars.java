@@ -35,6 +35,7 @@ public class Cars {
         String year;
         String city;
         Date timeOfCreate;
+        boolean sorted;
     }
 
     Car[] cars;
@@ -56,7 +57,7 @@ public class Cars {
         if(elem == null){
             return false;
         }
-        Pattern pattern = Pattern.compile("card_id\":\"([0-9]+).+updated\":\"([^\"]+)");
+        Pattern pattern = Pattern.compile("card_id\":\"([0-9]+).+created\":\"([^\"]+)");
         Matcher matcher = pattern.matcher(elem.attr("data-stat_params"));
         if(matcher.find()){
             currentCar.id = matcher.group(1);
@@ -98,6 +99,166 @@ public class Cars {
         message += "<br>Город: " + cars[pos].city;
         return message;
     }
+
+    public void sortByDateAvito()
+    {
+        int pointer = 0;
+        while(cars[pointer].sorted)
+            pointer++;
+        Car[] result = new Car[getLenth()];
+        int counter1 = pointer, counter2 = getLenth()-pointer,i=0;
+        while ((counter1 != 0) && (counter2 != 0))
+        {
+            if(cars[pointer-counter1].timeOfCreate.after(cars[getLenth() - counter2].timeOfCreate)) {
+                result[i] = cars[pointer - counter1];
+                counter1--;
+            }
+            else {
+                result[i] = cars[getLenth() - counter2];
+                counter2--;
+            }
+            i++;
+        }
+        while(counter1 != 0)
+        {
+            result[i] = cars[pointer - counter1];
+            counter1--;
+            i++;
+        }
+        while(counter2 != 0)
+        {
+            result[i] = cars[getLenth() - counter2];
+            counter2--;
+            i++;
+        }
+        cars = result;
+    }
+
+    public static Cars merge(Cars carsAvto, Cars carsAvito)
+    {
+        carsAvito.sortByDateAvito();
+        Cars result = new Cars(carsAvto.getLenth() + carsAvito.getLenth());
+        int counter1 = carsAvto.getLenth(), counter2 = carsAvito.getLenth(),i=0;
+        while ((counter1 != 0) && (counter2 != 0))
+        {
+            if(carsAvto.cars[carsAvto.getLenth()-counter1].timeOfCreate.after(carsAvito.cars[carsAvito.getLenth() - counter2].timeOfCreate)) {
+                result.cars[i] = carsAvto.cars[carsAvto.getLenth() - counter1];
+                counter1--;
+            }
+            else {
+                result.cars[i] = carsAvito.cars[carsAvito.getLenth() - counter2];
+                counter2--;
+            }
+            i++;
+        }
+        while(counter1 != 0)
+        {
+            result.cars[i] = carsAvto.cars[carsAvto.getLenth() - counter1];
+            counter1--;
+            i++;
+        }
+        while(counter2 != 0)
+        {
+            result.cars[i] = carsAvito.cars[carsAvito.getLenth() - counter2];
+            counter2--;
+            i++;
+        }
+        result.lastCar = carsAvto.getLenth() + carsAvito.getLenth();
+        return result;
+    }
+
+    @TargetApi(Build.VERSION_CODES.GINGERBREAD)
+    public boolean addFromAvito(Element elem)
+    {
+        Car currentCar = new Car();
+        if(elem == null){
+            return false;
+        }
+        currentCar.id = elem.attr("id");
+        currentCar.img = elem.select("div.b-photo > a > img").attr("data-srcpath");
+        if(currentCar.img.isEmpty())
+            currentCar.img = elem.select("div.b-photo > a > img").attr("src");
+        if(currentCar.img.isEmpty())
+            currentCar.img = "//auto.ru/i/all7/img/no-photo-thumb.png";
+
+        currentCar.img = "http:" + currentCar.img;
+
+        currentCar.href = "https://www.avito.ru" + elem.select("div.description > h3 > a").attr("href");
+
+
+        currentCar.sorted = elem.select("div.description").first().children().hasClass("vas-applied");
+
+        currentCar.message = elem.select("div.description > h3 > a").text();
+        currentCar.year = currentCar.message.split(", ")[1];
+        currentCar.message = currentCar.message.split(", ")[0];
+
+        String buf = elem.select("div.description > div.about").text();
+        if(buf.split("\\.")[0].endsWith("руб")) {
+            currentCar.price = buf.split("\\.")[0];
+            buf = buf.substring(buf.indexOf('.'));
+        }
+        else
+            currentCar.price = "не указана";
+
+        Pattern pattern = Pattern.compile("([0-9]|\\s)+км");
+        Matcher matcher = pattern.matcher(buf);
+        if(matcher.find()) {
+            currentCar.mileage = matcher.group(0);
+            currentCar.message += buf.substring(buf.indexOf(currentCar.mileage)+currentCar.mileage.length());
+        }
+        else {
+            currentCar.mileage = "не указан";
+            currentCar.message += buf;
+        }
+
+        String[] date = elem.select("div.description > div.data > div").text().split(" ");
+        if(date.length == 2)
+        {
+            if(date[0].equals("Сегодня"))
+            {
+                currentCar.timeOfCreate = new Date();
+                currentCar.timeOfCreate.setMinutes(Integer.parseInt(date[1].split(":")[1]));
+                currentCar.timeOfCreate.setHours(Integer.parseInt(date[1].split(":")[0]));
+            }
+            else {
+                currentCar.timeOfCreate = new Date(System.currentTimeMillis() - 1000L * 60L * 60L * 24L);
+                currentCar.timeOfCreate.setMinutes(Integer.parseInt(date[1].split(":")[1]));
+                currentCar.timeOfCreate.setHours(Integer.parseInt(date[1].split(":")[0]));
+            }
+        }
+        else
+        {
+            currentCar.timeOfCreate = new Date();
+            switch (date[1])
+            {
+                case "января": currentCar.timeOfCreate.setMonth(0); break;
+                case "февраля": currentCar.timeOfCreate.setMonth(1); break;
+                case "марта": currentCar.timeOfCreate.setMonth(2); break;
+                case "апреля": currentCar.timeOfCreate.setMonth(3); break;
+                case "мая": currentCar.timeOfCreate.setMonth(4); break;
+                case "июня": currentCar.timeOfCreate.setMonth(5); break;
+                case "июля": currentCar.timeOfCreate.setMonth(6); break;
+                case "августа": currentCar.timeOfCreate.setMonth(7); break;
+                case "сентября": currentCar.timeOfCreate.setMonth(8); break;
+                case "октября": currentCar.timeOfCreate.setMonth(9); break;
+                case "ноября": currentCar.timeOfCreate.setMonth(10); break;
+                case "декабря": currentCar.timeOfCreate.setMonth(11); break;
+            }
+            currentCar.timeOfCreate.setMinutes(Integer.parseInt(date[2].split(":")[1]));
+            currentCar.timeOfCreate.setHours(Integer.parseInt(date[2].split(":")[0]));
+            currentCar.timeOfCreate.setDate(Integer.parseInt(date[0]));
+        }
+
+        if(!elem.select("div.description > div.data > p:nth-child(2)").text().isEmpty())
+            currentCar.city = elem.select("div.description > div.data > p:nth-child(2)").text();
+        else
+            currentCar.city = "не указан";
+
+        cars[lastCar] = currentCar;
+        lastCar++;
+        return true;
+    }
+
     public String getHref(int pos)
     {
         return cars[pos].href;

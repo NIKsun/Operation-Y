@@ -91,7 +91,6 @@ public class ListOfCars extends Activity {
     }
 
     class LoadListView extends AsyncTask<String, Void, Cars> {
-        String[] textsAndRefs;
         String[] imagesRef;
         Bitmap[] images;
         String s_data = "";
@@ -159,41 +158,63 @@ public class ListOfCars extends Activity {
                 ed.commit();
             }*/
 
-            Cars cars = null;
+            Cars cars1, cars2,cars;
             try {
                 Document doc;
                 doc  = Jsoup.connect(params[0]).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").get();
                 Elements mainElems  =  doc.select("body > div.branding_fix > div.content.content_style > article > div.clearfix > div.b-page-wrapper > div.b-page-content").first().children();
 
 
-                Log.i("Vizant1", String.valueOf(mainElems.size()));
-
                 Elements listOfCars = null;
                 for(int i=0;i<mainElems.size();i++)
                 {
                     String className = mainElems.get(i).className();
                     if((className.indexOf("widget widget_theme_white sales-list") == 0) && (className.length() == 36)){
-                        Log.i("Vizant34", className);
                         listOfCars = mainElems.get(i).select("div.sales-list-item");
                         break;
                     }
                 }
                 if(listOfCars == null)
                 {
-                    Log.i("Vizant1","empty");
                     toastErrorCarList.show();
                     return null;
                 }
-                Log.i("Vizant2", "Now");
 
-                cars = new Cars(listOfCars.size());
-                Bitmap LoadingImage = BitmapFactory.decodeResource(getResources(), R.drawable.res);
-                images = new Bitmap[listOfCars.size()];
+                cars1 = new Cars(listOfCars.size());
                 for(int i=0;i<listOfCars.size();i++)
                 {
-                    images[i] = LoadingImage;
-                    cars.addFromAutoRu(listOfCars.get(i).select("table > tbody > tr").first());
+                    cars1.addFromAutoRu(listOfCars.get(i).select("table > tbody > tr").first());
                 }
+
+                doc  = Jsoup.connect("https://www.avito.ru/rossiya/avtomobili/chevrolet/lanos").userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").get();
+                mainElems  =  doc.select("#catalog > div.layout-internal.col-12.js-autosuggest__search-list-container > div.l-content.clearfix > div.clearfix > div.catalog.catalog_table > div.catalog-list.clearfix").first().children();
+
+                if(mainElems == null)
+                {
+                    toastErrorCarList.show();
+                    return null;
+                }
+
+                int length = 0;
+                for(int i=0;i<mainElems.size();i++)
+                    length += mainElems.get(i).children().size();
+
+                cars2 = new Cars(length);
+
+                for(int i=0;i<mainElems.size();i++)
+                    for(int j=0; j<mainElems.get(i).children().size(); j++) {
+                        cars2.addFromAvito(mainElems.get(i).children().get(j));
+                    }
+                
+
+                cars = Cars.merge(cars1,cars2);
+
+                Bitmap LoadingImage = BitmapFactory.decodeResource(getResources(), R.drawable.res);
+                images = new Bitmap[cars.getLenth()];
+                Log.i("HTML", String.valueOf(cars.getLenth()));
+                for(int i=0;i<cars.getLenth();i++)
+                    images[i] = LoadingImage;
+
             } catch (Exception e) {
                 e.printStackTrace();
                 toastErrorConnection.show();
@@ -203,7 +224,6 @@ public class ListOfCars extends Activity {
         }
         @Override
         protected void onPostExecute(Cars result) {
-            Log.i("Vizant2", "Now2");
             super.onPostExecute(result);
             ProgressBar pb = (ProgressBar) findViewById(R.id.progressBar);
             pb.setVisibility(View.INVISIBLE);
