@@ -97,6 +97,7 @@ public class ListOfCars extends Activity {
     class LoadListView extends AsyncTask<String, Void, Cars> {
         String[] imagesRef;
         Bitmap[] images;
+        final Cars[] carsAvto = new Cars[1], carsAvito = new Cars[1];
 
         @Override
         protected void onPreExecute() {
@@ -120,7 +121,6 @@ public class ListOfCars extends Activity {
                 ed.commit();
             }*/
 
-            final Cars[] carsAvto = new Cars[1], carsAvito = new Cars[1];
             final Boolean[] bulAvto = {true}, bulAvito = {true}, connectionSuccess = {true};
             Thread threadAvto = new Thread(new Runnable() {
                 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -147,7 +147,6 @@ public class ListOfCars extends Activity {
                     }
                     if(listOfCars == null)
                     {
-                        toastErrorCarList.show();
                         bulAvto[0] = false;
                         return;
                     }
@@ -209,6 +208,8 @@ public class ListOfCars extends Activity {
             if(!bulAvto[0])
                 carsAvto[0] = new Cars(0);
 
+
+
             Cars cars = Cars.merge(carsAvto[0],carsAvito[0]);
             Bitmap LoadingImage = BitmapFactory.decodeResource(getResources(), R.drawable.res);
             images = new Bitmap[cars.getLenth()];
@@ -219,6 +220,8 @@ public class ListOfCars extends Activity {
         @Override
         protected void onPostExecute(Cars result) {
             super.onPostExecute(result);
+            Toast.makeText(ListOfCars.this, "Найдено " + carsAvto[0].getLenth() + "ПОСЛЕДНИХ объявлений на Auto.ru и "
+                    + carsAvito[0].getLenth() + " на Avito.ru, отсортировано по дате", Toast.LENGTH_LONG).show();
             ProgressBar pb = (ProgressBar) findViewById(R.id.progressBar);
             pb.setVisibility(View.INVISIBLE);
 
@@ -230,6 +233,7 @@ public class ListOfCars extends Activity {
             ListView lv = (ListView) findViewById(R.id.listView);
             SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
             lv.setAdapter(new ListViewAdapter(ListOfCars.this, result, images, sPref.getInt("SearchMyCarCountOfNewCars", 0)));
+
 
             imagesRef = new String[result.getLenth()];
             for (int i = 0; i < result.getLenth(); i++) {
