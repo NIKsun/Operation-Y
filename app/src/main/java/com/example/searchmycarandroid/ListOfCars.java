@@ -86,8 +86,9 @@ public class ListOfCars extends Activity {
         });
 
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-        String request = sPref.getString("SearchMyCarRequest", "");
-        loader.execute(request);
+        String requestAuto = sPref.getString("SearchMyCarRequest", "");
+        String requestAvito = sPref.getString("SearchMyCarRequestAvito", "");
+        loader.execute(requestAuto,requestAvito);
     }
 
     public void onClickStart(View v) {
@@ -163,7 +164,7 @@ public class ListOfCars extends Activity {
                 public void run() {
                     Document doc;
                     try {
-                        doc = Jsoup.connect("https://www.avito.ru/rossiya/avtomobili/chevrolet/lanos").userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").get();
+                        doc = Jsoup.connect(params[1]).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").get();
                     }
                     catch (HttpStatusException e)
                     {
@@ -220,8 +221,6 @@ public class ListOfCars extends Activity {
         @Override
         protected void onPostExecute(Cars result) {
             super.onPostExecute(result);
-            Toast.makeText(ListOfCars.this, "Найдено " + carsAvto[0].getLenth() + "ПОСЛЕДНИХ объявлений на Auto.ru и "
-                    + carsAvito[0].getLenth() + " на Avito.ru, отсортировано по дате", Toast.LENGTH_LONG).show();
             ProgressBar pb = (ProgressBar) findViewById(R.id.progressBar);
             pb.setVisibility(View.INVISIBLE);
 
@@ -229,6 +228,9 @@ public class ListOfCars extends Activity {
                 finish();
                 return;
             }
+
+            Toast.makeText(ListOfCars.this, "Найдено " + carsAvto[0].getLenth() + " ПОСЛЕДНИХ объявлений на Auto.ru и "
+                    + carsAvito[0].getLenth() + " на Avito.ru, отсортировано по дате", Toast.LENGTH_LONG).show();
 
             ListView lv = (ListView) findViewById(R.id.listView);
             SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
