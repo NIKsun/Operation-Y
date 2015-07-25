@@ -1,63 +1,82 @@
 package com.example.searchmycarandroid;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.TimePickerDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.NumberPicker;
-import android.widget.TextView;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.Date;
 
 
-public class CreateRequestActivity extends Activity implements View.OnClickListener {
+public class CreateRequestActivity extends Activity implements OnClickListener {
     DBHelper dbHelper;
+    static Dialog dialogPicker ;
 
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+        if(sPref.contains("SelectedMark"))
+        {
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+            Button b = (Button) findViewById(R.id.marka_button);
+            Integer posMark = sPref.getInt("SelectedMark", 0)+1;
+
+            Cursor cursorMark = db.query("marksTable", null, "id=?", new String[]{posMark.toString()}, null, null, null);
+            cursorMark.moveToFirst();
+            String marka = cursorMark.getString(cursorMark.getColumnIndex("markauser"));
+
+            b.setText(marka);
+
+            if(sPref.contains("SelectedModel"))
+            {
+                Button b1 = (Button) findViewById(R.id.model_button);
+                Integer posModel = sPref.getInt("SelectedModel", 0)+1;
+
+                Cursor cursorModel = db.query("modelsTable", null, "marka_id=?", new String[]{posMark.toString()}, null, null, null);
+                cursorModel.moveToFirst();
+                int i = 1;
+                while(i<posModel){
+                    cursorModel.moveToNext();
+                    ++i;
+                }
+                String model = cursorModel.getString(cursorModel.getColumnIndex("modeluser"));
+
+                b1.setText(model);
+
+            }
+
+            db.close();
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_create_request);
+        dbHelper = new DBHelper(this);
 
-        final Dialog d = new Dialog(CreateRequestActivity.this);
-        d.setTitle("Год выпуска");
-        d.setContentView(R.layout.number_picker);
-        final NumberPicker np3 = (NumberPicker) d.findViewById(R.id.numberPicker1);
-        final NumberPicker np4 = (NumberPicker) d.findViewById(R.id.numberPicker2);
-        np3.setMinValue(1940);
-        np3.setMaxValue(2015);
-        np3.setValue(2015);
-        //np3.setWrapSelectorWheel(false);
-        np4.setMinValue(1940);
-        np4.setMaxValue(2015);
-        np4.setValue(2015);
-        //np4.setWrapSelectorWheel(false);
-        d.show();
-
-
-        //dbHelper = new DBHelper(this);
     }
 
     @Override
     public void onClick(View v) {
-        dbHelper = new DBHelper(this);
+        //dbHelper = new DBHelper(this);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
 
@@ -72,6 +91,10 @@ public class CreateRequestActivity extends Activity implements View.OnClickListe
                 Integer posModel = sPref.getInt("SelectedModel",0)+1;
                 String begin = "http://auto.ru/cars/";
                 String end = "/all/?sort%5Bcreate_date%5D=desc";
+                Integer startYear = sPref.getInt("StartYear",1970);
+                Integer endYear = sPref.getInt("EndYear",2015);
+                String year1="&search%5Byear%5D%5Bmin%5D=";
+                String year2="&search%5Byear%5D%5Bmax%5D=";
 
                 Cursor cursorMark = db.query("marksTable", null, "id=?", new String[]{posMark.toString()}, null, null, null);
                 cursorMark.moveToFirst();
@@ -87,16 +110,18 @@ public class CreateRequestActivity extends Activity implements View.OnClickListe
                 String model = cursorModel.getString(cursorModel.getColumnIndex("modelrequest"));
 
                 String re = begin+marka+"/"+model+end;
-                ed.putString("SearchMyCarRequest", begin+marka+"/"+model+end);
+                ed.putString("SearchMyCarRequest", begin + marka + "/" + model + end + year1 + startYear.toString() + year2 + endYear.toString());
                 ed.putBoolean("SearchMyCarIsFromService", false);
                 ed.putInt("SearchMyCarCountOfNewCars", 0);
-                ed.commit();
                 ed.commit();
                 startActivity(intent);
 
                 break;
             case R.id.marka_button:
-                
+
+                sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+                sPref.edit().putInt("SelectedModel", 0).commit();
+
                 Cursor cursor = db.query("marksTable", null, null, null, null, null, null);
                 String strToParse = "";
 
@@ -111,7 +136,6 @@ public class CreateRequestActivity extends Activity implements View.OnClickListe
                 Intent intent2 = new Intent(this, ListOfMarkActivity.class);
                 intent2.putExtra("Marks",marks_arr);
                 startActivity(intent2);
-
                 break;
             case R.id.model_button:
 
@@ -132,7 +156,9 @@ public class CreateRequestActivity extends Activity implements View.OnClickListe
                 Intent intent3 = new Intent(this, ListOfMarkActivity.class);
                 intent3.putExtra("Models",models_arr);
                 startActivity(intent3);
-
+                break;
+            case R.id.year_button:
+                showPickerDialog();
                 break;
             default:
                 break;
@@ -205,4 +231,40 @@ public class CreateRequestActivity extends Activity implements View.OnClickListe
         }
     }
 
+    public void showPickerDialog()
+    {
+        final Dialog dialogPicker = new Dialog(CreateRequestActivity.this);
+        dialogPicker.setTitle("Год выпуска");
+        dialogPicker.setContentView(R.layout.number_picker);
+
+        final NumberPicker np1 = (NumberPicker) dialogPicker.findViewById(R.id.numberPicker1);
+        final NumberPicker np2 = (NumberPicker) dialogPicker.findViewById(R.id.numberPicker2);
+
+        np1.setMinValue(1970);
+        np1.setMaxValue(2015/*new Date().getYear()*/);
+        np1.setValue(2010);
+
+        np2.setMinValue(1970);
+        np2.setMaxValue(1900 + new Date().getYear());
+        np2.setValue(2015);
+
+        Button ok = (Button) dialogPicker.findViewById(R.id.buttonPicker);
+        ok.setOnClickListener(new OnClickListener()
+        {
+            @Override
+            public void onClick(View v) {
+
+                SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+                sPref.edit().putInt("StartYear", np1.getValue()).commit();
+                sPref.edit().putInt("EndYear", np2.getValue()).commit();
+
+                Button b2 = (Button) findViewById(R.id.year_button);
+                b2.setText("Год выпуска: с "+np1.getValue()+" по "+np2.getValue());
+
+
+                dialogPicker.dismiss();
+            }
+        });
+        dialogPicker.show();
+    }
 }
