@@ -61,7 +61,7 @@ public class Cars {
         Matcher matcher = pattern.matcher(elem.attr("data-stat_params"));
         if(matcher.find()){
             currentCar.id = matcher.group(1);
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             try {
                 currentCar.timeOfCreate = format.parse(matcher.group(2));
             } catch (ParseException e) {
@@ -70,7 +70,6 @@ public class Cars {
         }
         else
             return false;
-
 
         currentCar.href = elem.select("td.sales-list-cell.sales-list-cell_images > a").first().attr("href");
         currentCar.img = elem.select("td.sales-list-cell.sales-list-cell_images > a > img").first().attr("data-original");
@@ -92,11 +91,11 @@ public class Cars {
     public String getMessage(int pos)
     {
         String message = "";
-        message  += "<font><b>" + cars[pos].message + "</b></font>";
-        message += "<h5>Цена: " + cars[pos].price +"</h5>";
-        message += "Год: " + cars[pos].year;
+        message  += "<h6><font face=fantasy color=#08088A>" + cars[pos].message + "</font></h6>";
+        message += "<h6>Цена: " + cars[pos].price +"</h6>";
+        message += "<font color=#585858>Год: " + cars[pos].year;
         message += "<br>Пробег: " + cars[pos].mileage;
-        message += "<br>Город: " + cars[pos].city;
+        message += "<br>Город: " + cars[pos].city + "</font>";
         return message;
     }
 
@@ -136,6 +135,9 @@ public class Cars {
 
     public static Cars merge(Cars carsAvto, Cars carsAvito)
     {
+        /*Log.i("Tag", String.valueOf(carsAvto.getLenth()));
+        for(int n=0;n<carsAvto.getLenth();n++)
+            Log.i("Tag", String.valueOf(carsAvto.cars[n].timeOfCreate));*/
         Cars result = new Cars(carsAvto.getLenth() + carsAvito.getLenth());
         int counter1 = carsAvto.getLenth(), counter2 = carsAvito.getLenth(),i=0;
         while ((counter1 != 0) && (counter2 != 0))
