@@ -92,9 +92,9 @@ public class Cars {
     public String getMessage(int pos)
     {
         String message = "";
-        message  += "<font face=fantasy><b>" + cars[pos].message + "</b></font>";
-        message += "<br>Год: " + cars[pos].year;
-        message += "<br>Цена: " + cars[pos].price;
+        message  += "<font><b>" + cars[pos].message + "</b></font>";
+        message += "<h5>Цена: " + cars[pos].price +"</h5>";
+        message += "Год: " + cars[pos].year;
         message += "<br>Пробег: " + cars[pos].mileage;
         message += "<br>Город: " + cars[pos].city;
         return message;
@@ -136,7 +136,6 @@ public class Cars {
 
     public static Cars merge(Cars carsAvto, Cars carsAvito)
     {
-        carsAvito.sortByDateAvito();
         Cars result = new Cars(carsAvto.getLenth() + carsAvito.getLenth());
         int counter1 = carsAvto.getLenth(), counter2 = carsAvito.getLenth(),i=0;
         while ((counter1 != 0) && (counter2 != 0))
