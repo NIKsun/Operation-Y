@@ -32,14 +32,36 @@
                 android:layout_gravity="center_horizontal"
                 android:onClick="onClick"
                 />
-            <Button
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Год выпуска"
-                android:id="@+id/year_button"
+                android:orientation="horizontal"
                 android:layout_gravity="center_horizontal"
-                android:onClick="onClick"
-                />
+                android:weightSum="100"
+                >
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Год выпуска"
+                    android:id="@+id/year_button"
+                    android:layout_weight="87"
+                    android:onClick="onClick"
+                    android:layout_marginRight="-4dp"
+                    />
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:drawableEnd="@drawable/krest"
+                    android:id="@+id/year_button1"
+                    android:layout_weight="13"
+                    android:layout_marginLeft="-4dp"
+
+                    android:layout_marginRight="0dp"
+                    android:layout_gravity="center_vertical"
+
+
+                    />
+            </LinearLayout>
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -107,9 +129,9 @@
                 android:button="@drawable/checker"
                 android:checked="false"
                 android:paddingLeft="10dp"
-                android:paddingTop="9dp"
+                android:paddingTop="2dp"
                 android:paddingRight="10dp"
-                android:paddingBottom="9dp" />
+                android:paddingBottom="2dp" />
 
         </LinearLayout>
     </ScrollView>
