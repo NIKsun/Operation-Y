@@ -13,9 +13,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.concurrent.TimeUnit;
 
 public class MonitoringService extends Service {
@@ -70,7 +67,7 @@ public class MonitoringService extends Service {
                 public void run() {
                     try {
 
-                        
+
 
 
                     } catch (Exception e) {
