@@ -11,15 +11,22 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.NumberPicker;
+import android.widget.Toast;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 
 public class CreateRequestActivity extends Activity implements OnClickListener {
@@ -76,7 +83,16 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
         // clear year
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         sPref.edit().putInt("StartYear", 1970).commit();
-        sPref.edit().putInt("EndYear", 2015).commit();
+        sPref.edit().putInt("EndYear", 1900 + new Date().getYear()).commit();
+        //clear price
+        sPref.edit().putInt("StartPrice", 0).commit();
+        sPref.edit().putInt("EndPrice", 10000000).commit();
+        //clear engine volume
+        sPref.edit().putInt("StartVolume", 0).commit();
+        sPref.edit().putInt("EndVolume", 36).commit();
+        //clear probeg
+        sPref.edit().putInt("Probeg", 61).commit();
+
 
     }
 
@@ -96,20 +112,87 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 Integer posMark = sPref.getInt("SelectedMark", 0)+1;
                 Integer posModel = sPref.getInt("SelectedModel",0)+1;
 
+                Integer startYear = sPref.getInt("StartYear",1970);
+                Integer endYear = sPref.getInt("EndYear",2015);
+
+                Integer startPrice = sPref.getInt("StartPrice",0);
+                Integer endPrice = sPref.getInt("EndPrice",100000000);
+
+                //volume is another!!!!!!! (0-36)
+                int startVolume = sPref.getInt("StartVolume",0);
+                int endVolume = sPref.getInt("EndVolume",36);
+                String[] volume_arr_avto = new String[]{"0.0","0.6","0.7","0.8","0.9","1.0","1.1","1.2","1.3","1.4","1.5","1.6","1.7","1.8","1.9","2.0","2.1","2.2","2.3","2.4","2.5","2.6","2.7","2.8","2.9","3.0","3.1","3.2","3.3","3.4","3.5","4.0","4.5","5.0","5.5","6.0","10.0"};
+                String[] volume_arr_avito = new String[]{"15775", "15776", "15777", "15778", "15779", "15780", "15781", "15782", "15783", "15784", "15785", "15786", "15787", "15788", "15789", "15790", "15791", "15792", "15793", "15794", "15795", "15796", "15797", "15798", "15799", "15800", "15801", "15802", "15803", "15804", "15805", "15810", "15815", "15820", "15825", "15830", "15831"};
+
+
+                //probeg is another (0-61)
+                int probegval = sPref.getInt("Probeg",61);
+                String[] probeg_arr_avto = new String[]{"0","5000","10000","15000","20000","25000","30000","35000","40000","45000","50000","55000", "60000", "65000", "70000","75000","80000","85000","90000","95000","100000","110000","120000","130000","140000","150000","160000","170000","180000","190000","200000","210000","220000","230000","240000","250000","260000","270000","280000","290000","300000","310000","320000","330000","340000","350000","360000","370000","380000","390000","400000","410000","420000","430000","440000","450000","460000","470000","480000","490000","500000","100000000"};
+                String[] probeg_arr_avito = new String[]{"15483", "15486", "15487", "15490", "15492", "15494", "15496", "15498", "15500", "15502", "15505", "15506", "15509", "15510", "15512", "15513", "15516", "15517", "15520", "15521", "15524", "15527", "15528", "15531", "15533", "15535", "15536", "15539", "15540", "15542", "15544", "15545", "15546", "15547", "15548", "15554", "15556", "15557", "15558", "15559", "15560", "15561", "15562", "15563", "15564", "15565", "15566", "15567", "15568", "15569", "15570", "15571", "15572", "15573", "15574", "15575", "15576", "15577", "15578", "15579", "15581", "15582"};
                 //constructor for auto.ru
                 String begin = "http://auto.ru/cars/";
                 String end = "/all/?sort%5Bcreate_date%5D=desc";
-                Integer startYear = sPref.getInt("StartYear",1970);
-                Integer endYear = sPref.getInt("EndYear",2015);
                 String year1="&search%5Byear%5D%5Bmin%5D=";
                 String year2="&search%5Byear%5D%5Bmax%5D=";
-                Integer startPrice = sPref.getInt("StartPrice",0);
-                Integer endPrice = sPref.getInt("EndPrice",100000000);
                 String price1="&search%5Bprice%5D%5Bmin%5D="+startPrice+"%D1%80%D1%83%D0%B1.";
                 String price2="&search%5Bprice%5D%5Bmax%5D="+endPrice+"%D1%80%D1%83%D0%B1.";
+                String photo ="";
+                String eng_vol1 = "&search%5Bengine_volume%5D%5Bmin%5D=";
+                String eng_vol2 = "&search%5Bengine_volume%5D%5Bmax%5D=";
+                String probeg = "&search%5Brun%5D%5Bmax%5D="+probeg_arr_avto[probegval]+"%D0%BA%D0%BC";
 
                 //constructor for avito
                 String begin_avito = "https://www.avito.ru/rossiya/avtomobili/";
+                Map<Integer, String> map = new HashMap<Integer, String>();
+                //region map create
+                map.put(1970,"782");
+                map.put(1980,"873");
+                map.put(1985,"878");
+                map.put(1990,"883");
+                map.put(1991,"884");
+                map.put(1992,"885");
+                map.put(1993,"886");
+                map.put(1994,"887");
+                map.put(1995,"888");
+                map.put(1996,"889");
+                map.put(1997,"890");
+                map.put(1998,"891");
+                map.put(1999,"892");
+                map.put(2000,"893");
+                map.put(2001,"894");
+                map.put(2002,"895");
+                map.put(2003,"896");
+                map.put(2004,"897");
+                map.put(2005,"898");
+                map.put(2006,"899");
+                map.put(2007,"900");
+                map.put(2008,"901");
+                map.put(2009,"902");
+                map.put(2010,"2844");
+                map.put(2011,"2845");
+                map.put(2012,"6045");
+                map.put(2013,"8581");
+                map.put(2014,"11017");
+                map.put(2015,"13978");
+                //endregion
+                String startYearAvito = map.get(startYear);
+                String endYearAvito = map.get(endYear);
+                String year1a = "188_";
+                String year2a = "b";
+                String price1a = "&pmin=";
+                String price2a = "&pmax=";
+                String photoa = "";
+                String eng_vol1a = "1374_";
+                String eng_vol2a = "b";
+                String probega = "1375_"+"15483"+"b"+probeg_arr_avito[probegval]+".";
+
+                CheckBox is_photo = (CheckBox) this.findViewById(R.id.checkBox);
+                if(is_photo.isChecked()){
+                    photo ="&search%5Bphoto%5D%5B1%5D=1";
+                    photoa = "&i=1";
+                }
+
+
 
 
                 //get mark
@@ -133,9 +216,9 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 String requestauto = "###";
                 String requestavito = "###";
                 if(!(marka.equals("###")) && !(model.equals("###")))
-                    requestauto = begin + marka + "/" + model + end + year1 + startYear.toString() + year2 + endYear.toString() + price1 + price2;
+                    requestauto = begin + marka + "/" + model + end + year1 + startYear.toString() + year2 + endYear.toString() + price1 + price2+photo+eng_vol1+volume_arr_avto[startVolume]+eng_vol2+volume_arr_avto[endVolume]+probeg;
                 if(!(markaavito.equals("###")) && !(modelavito.equals("###")))
-                    requestavito = begin_avito+markaavito+"/"+modelavito+"/";
+                    requestavito = begin_avito+markaavito+"/"+modelavito+"/?"+photoa+price1a+startPrice+price2a+endPrice+"&f="+year1a+startYearAvito+year2a+endYearAvito+"."+eng_vol1a+volume_arr_avito[startVolume]+eng_vol2a+volume_arr_avito[endVolume]+"."+probega;
                 ed.putString("SearchMyCarRequest", requestauto);
                 ed.putString("SearchMyCarRequestAvito", requestavito);
 
@@ -194,6 +277,9 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
             case R.id.engine_volume_button:
                 showPickerEngineVolume();
                 break;
+            case R.id.probeg_button:
+                showPickerProbeg();
+                break;
             default:
                 break;
         }
@@ -204,7 +290,7 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
 
         public DBHelper(Context context) {
 
-            super(context, "pcars24DB", null, 1);
+            super(context, "pcars25DB", null, 1);
         }
 
         @Override
@@ -279,8 +365,14 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
         final NumberPicker np1 = (NumberPicker) dialogPicker.findViewById(R.id.numberPicker1);
         final NumberPicker np2 = (NumberPicker) dialogPicker.findViewById(R.id.numberPicker2);
 
+        SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+        String oldYear1 = String.valueOf(sPref.getInt("StartYear", 2010));
+        String oldYear2 = String.valueOf(sPref.getInt("EndYear", 2015));
+
+
         Integer count_year = 1900 + new Date().getYear() - 1970 - 9 -4 -4 +1;
         np1.setMinValue(1);
+
         np1.setMaxValue(count_year);
         np2.setMinValue(1);
         np2.setMaxValue(count_year);
@@ -296,26 +388,42 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
         np1.setDisplayedValues(year_arr);
         np2.setDisplayedValues(year_arr);
 
+        for(int j=0;j<year_arr.length;++j){
+            if(year_arr[j].equals(oldYear1))
+                np1.setValue(j+1);
+            if(year_arr[j].equals(oldYear2))
+                np2.setValue(j+1);
+        }
+
         Button ok = (Button) dialogPicker.findViewById(R.id.buttonPicker);
         ok.setOnClickListener(new OnClickListener()
         {
             @Override
             public void onClick(View v) {
 
-                SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-                sPref.edit().putInt("StartYear", Integer.parseInt(year_arr[np1.getValue() - 1])).commit();
-                sPref.edit().putInt("EndYear", Integer.parseInt(year_arr[np2.getValue() - 1])).commit();
+                Integer start = Integer.parseInt(year_arr[np1.getValue() - 1]);
+                Integer end = Integer.parseInt(year_arr[np2.getValue() - 1]);
+                if(start > end)
+                {
+                    Toast t = Toast.makeText(getApplicationContext(),"Параметры заданы некорректно",Toast.LENGTH_SHORT);
+                    t.show();
+                }
+                else
+                {
+                    SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+                    sPref.edit().putInt("StartYear", Integer.parseInt(year_arr[np1.getValue() - 1])).commit();
+                    sPref.edit().putInt("EndYear", Integer.parseInt(year_arr[np2.getValue() - 1])).commit();
 
-                Button b2 = (Button) findViewById(R.id.year_button);
-                b2.setText("Год выпуска: с "+year_arr[np1.getValue() - 1]+" по "+year_arr[np2.getValue() - 1]);
+                    Button b2 = (Button) findViewById(R.id.year_button);
+                    b2.setText("Год выпуска: с "+year_arr[np1.getValue() - 1]+" по "+year_arr[np2.getValue() - 1]);
 
 
-                dialogPicker.dismiss();
+                    dialogPicker.dismiss();
+                }
             }
         });
         dialogPicker.show();
     }
-
     public void showPickerPrice()
     {
         final Dialog dialogPicker = new Dialog(CreateRequestActivity.this);
@@ -324,6 +432,10 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
 
         final NumberPicker np1 = (NumberPicker) dialogPicker.findViewById(R.id.numberPicker1);
         final NumberPicker np2 = (NumberPicker) dialogPicker.findViewById(R.id.numberPicker2);
+
+        SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+        String oldPrice1 = String.valueOf(sPref.getInt("StartPrice", 2010));
+        String oldPrice2 = String.valueOf(sPref.getInt("EndPrice", 2015));
 
         Integer count_price = 96+80;
         np1.setMinValue(1);
@@ -351,6 +463,13 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
         np2.setDisplayedValues(price_arr);
 
 
+        for(int j=0;j<price_arr.length;++j){
+            if(price_arr[j].equals(oldPrice1))
+                np1.setValue(j+1);
+            if(price_arr[j].equals(oldPrice2))
+                np2.setValue(j+1);
+        }
+
 
 
         Button ok = (Button) dialogPicker.findViewById(R.id.buttonPicker);
@@ -359,15 +478,25 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
             @Override
             public void onClick(View v) {
 
-                SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-                sPref.edit().putInt("StartPrice", Integer.parseInt(price_arr[np1.getValue() - 1])).commit();
-                sPref.edit().putInt("EndPrice", Integer.parseInt(price_arr[np2.getValue() - 1])).commit();
+                Integer start = Integer.parseInt(price_arr[np1.getValue() - 1]);
+                Integer end = Integer.parseInt(price_arr[np2.getValue() - 1]);
+                if(start > end)
+                {
+                    Toast t = Toast.makeText(getApplicationContext(),"Параметры заданы некорректно",Toast.LENGTH_SHORT);
+                    t.show();
+                }
+                else {
 
-                Button b2 = (Button) findViewById(R.id.price_button);
-                b2.setText("Цена: от "+price_arr[np1.getValue()-1]+" до "+price_arr[np2.getValue() - 1]);
+                    SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+                    sPref.edit().putInt("StartPrice", Integer.parseInt(price_arr[np1.getValue() - 1])).commit();
+                    sPref.edit().putInt("EndPrice", Integer.parseInt(price_arr[np2.getValue() - 1])).commit();
+
+                    Button b2 = (Button) findViewById(R.id.price_button);
+                    b2.setText("Цена: от " + price_arr[np1.getValue() - 1] + " до " + price_arr[np2.getValue() - 1]);
 
 
-                dialogPicker.dismiss();
+                    dialogPicker.dismiss();
+                }
             }
         });
         dialogPicker.show();
@@ -378,31 +507,27 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
         dialogPicker.setTitle("Объём двигателя");
         dialogPicker.setContentView(R.layout.number_picker);
 
+        SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+        int oldVolume1 = sPref.getInt("StartVolume", 0);
+        int oldVolume2 = sPref.getInt("EndVolume", 36);
+
         final NumberPicker np1 = (NumberPicker) dialogPicker.findViewById(R.id.numberPicker1);
         final NumberPicker np2 = (NumberPicker) dialogPicker.findViewById(R.id.numberPicker2);
 
-        Integer count_volume = 26;
-        np1.setMinValue(1);
-        np1.setMaxValue(count_volume);
-        np2.setMinValue(1);
-        np2.setMaxValue(count_volume);
 
-        final String[] value_arr = new String[count_volume];
-        for(int i=0; i<value_arr.length; ++i){
-            if(i<16){
-                value_arr[i] = String.valueOf(round((float) (Float.parseFloat(String.valueOf(i))*0.2),1));
-                continue;
-            }
-            if(i<22){
-                value_arr[i]= String.valueOf(Float.parseFloat(value_arr[i - 1])+0.5);
-                continue;
-            }
-            value_arr[i] = String.valueOf(Float.parseFloat(value_arr[i - 1]) + 1.0);
-        }
+
+        final String[] value_arr = new String[]{"0.0","0.6","0.7","0.8","0.9","1.0","1.1","1.2","1.3","1.4","1.5","1.6","1.7","1.8","1.9","2.0","2.1","2.2","2.3","2.4","2.5","2.6","2.7","2.8","2.9","3.0","3.1","3.2","3.3","3.4","3.5","4.0","4.5","5.0","5.5","6.0","6.0+"};
+        np1.setMinValue(1);
+        np1.setMaxValue(value_arr.length);
+        np2.setMinValue(1);
+        np2.setMaxValue(value_arr.length);
+
         np1.setDisplayedValues(value_arr);
         np2.setDisplayedValues(value_arr);
 
 
+        np1.setValue(oldVolume1 + 1);
+        np2.setValue(oldVolume2 + 1);
 
 
         Button ok = (Button) dialogPicker.findViewById(R.id.buttonPicker);
@@ -411,15 +536,57 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
             @Override
             public void onClick(View v) {
 
+                if(np1.getValue() > np2.getValue())
+                {
+                    Toast t = Toast.makeText(getApplicationContext(),"Параметры заданы некорректно",Toast.LENGTH_SHORT);
+                    t.show();
+                }
+                else {
+
+                    SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+                    sPref.edit().putInt("StartVolume", np1.getValue() - 1).commit();
+                    sPref.edit().putInt("EndVolume", np2.getValue() - 1).commit();
+
+                    Button b2 = (Button) findViewById(R.id.engine_volume_button);
+                    b2.setText("Объём : от " + value_arr[np1.getValue() - 1] + " до " + value_arr[np2.getValue() - 1]);
+
+
+                    dialogPicker.dismiss();
+                }
+            }
+        });
+        dialogPicker.show();
+    }
+    public void showPickerProbeg()
+    {
+        final Dialog dialogPicker = new Dialog(CreateRequestActivity.this);
+        dialogPicker.setTitle("Пробег до (тыс. км.):");
+        dialogPicker.setContentView(R.layout.one_picker);
+
+        SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+        int oldProbeg = sPref.getInt("Probeg", 61);
+
+        final NumberPicker np1 = (NumberPicker) dialogPicker.findViewById(R.id.onenumberPicker);
+        final String[] probeg_arr = new String[]{"0","5","10","15","20","25","30","35","40","45","50","55", "60", "65", "70","75","80","85","90","95","100","110","120","130","140","150","160","170","180","190","200","210","220","230","240","250","260","270","280","290","300","310","320","330","340","350","360","370","380","390","400","410","420","430","440","450","460","470","480","490","500","500+"};
+        np1.setMinValue(1);
+        np1.setMaxValue(probeg_arr.length);
+        np1.setDisplayedValues(probeg_arr);
+        np1.setValue(oldProbeg + 1);
+
+        Button ok = (Button) dialogPicker.findViewById(R.id.onebuttonPicker);
+        ok.setOnClickListener(new OnClickListener()
+        {
+            @Override
+            public void onClick(View v) {
+
                 SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-                sPref.edit().putInt("StartVolume", Integer.parseInt(value_arr[np1.getValue() - 1])).commit();
-                sPref.edit().putInt("EndVolume", Integer.parseInt(value_arr[np2.getValue() - 1])).commit();
+                sPref.edit().putInt("Probeg", np1.getValue() - 1).commit();
 
-                Button b2 = (Button) findViewById(R.id.price_button);
-                b2.setText("Объём : от "+value_arr[np1.getValue()-1]+" до "+value_arr[np2.getValue() - 1]);
-
+                Button b2 = (Button) findViewById(R.id.probeg_button);
+                b2.setText("Пробег до : "+ probeg_arr[np1.getValue()-1] + " тыс. км.");
 
                 dialogPicker.dismiss();
+
             }
         });
         dialogPicker.show();
