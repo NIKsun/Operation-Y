@@ -190,8 +190,15 @@ public class ListOfCars extends Activity {
 
                 }
             });
-            threadAvito.start();
-            threadAvto.start();
+            if(!params[0].equals("###"))
+                threadAvto.start();
+            else
+                bulAvto[0] = false;
+            if(!params[1].equals("###"))
+                threadAvito.start();
+            else
+                bulAvito[0] = false;
+
             while (threadAvto.isAlive() || threadAvito.isAlive()); //waiting
 
             if(!connectionSuccess[0]) {
@@ -209,13 +216,12 @@ public class ListOfCars extends Activity {
             if(!bulAvto[0])
                 carsAvto[0] = new Cars(0);
 
-
-
             Cars cars = Cars.merge(carsAvto[0],carsAvito[0]);
             Bitmap LoadingImage = BitmapFactory.decodeResource(getResources(), R.drawable.res);
             images = new Bitmap[cars.getLenth()];
             for(int i=0;i<cars.getLenth();i++)
                 images[i] = LoadingImage;
+
             return cars;
         }
         @Override

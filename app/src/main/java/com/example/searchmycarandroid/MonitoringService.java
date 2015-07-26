@@ -20,11 +20,10 @@ import java.util.concurrent.TimeUnit;
 
 public class MonitoringService extends Service {
     NotificationManager nm;
-    String request;
+    String requestAvito, requestAuto;
     String lastCarId;
-    byte[] reqByte;
 
-    Thread t = new Thread(new Runnable() {
+    Thread mainThread = new Thread(new Runnable() {
         @TargetApi(Build.VERSION_CODES.HONEYCOMB)
         public void run() {
             try {
@@ -42,14 +41,16 @@ public class MonitoringService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-        request = sPref.getString("SearchMyCarRequestService", "");
-        t.start();
+        requestAuto = sPref.getString("SearchMyCarServiceRequestAuto", "");
+        requestAvito = sPref.getString("SearchMyCarServiceRequestAvito", "");
+        mainThread.start();
 
         return START_STICKY;
     }
 
     public void onDestroy() {
-        request=null;
+        requestAuto=null;
+        requestAvito=null;
         super.onDestroy();
     }
     public IBinder onBind(Intent intent) {
@@ -60,37 +61,25 @@ public class MonitoringService extends Service {
     void ServiceProcess() throws InterruptedException {
         for (int i = 1; i<=100; i++) {
             TimeUnit.SECONDS.sleep(120);
-            if(request == null)
+            if(requestAuto == null && requestAvito == null)
                 return;
             SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-            lastCarId = sPref.getString("SearchMyCarLastCarID","");
-            final String complexRequest =  request + "@@@" + lastCarId;
-            final String[] answer = {""};
-
+            lastCarId = sPref.getString("SearchMyCarLastCarDate","");
             Thread t = new Thread(new Runnable() {
                 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
                 public void run() {
                     try {
-                        Socket soc = new Socket();
-                        soc.bind(null);
-                        soc.connect(new InetSocketAddress(InetAddress.getByName("193.124.59.57"), 11111));
-                        soc.setKeepAlive(true);
-                        soc.getOutputStream().write(complexRequest.getBytes());
-                        int r = 0;
-                        byte[] buf = new byte[64 * 1024];
-                        do {
-                            r = soc.getInputStream().read(buf);
-                            answer[0] += new String(buf, 0, r);
-                        }
-                        while (r != 0);
+
+                        
+
+
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
             });
             t.start();
-            while (t.isAlive())
-                continue;
+            while (t.isAlive());
             if(Integer.parseInt(answer[0]) != 0) {
                 sendNotification(answer[0]);
             }

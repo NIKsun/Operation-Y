@@ -1,68 +1,133 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" android:background="#0099cc"
-    tools:context=".CreateRequestActivity">
+    tools:context=".CreateRequestActivity"
+    android:orientation="vertical"
+    android:weightSum="100">
 
-    <!-- The primary full-screen view. This can be replaced with whatever view
-         is needed to present your content, e.g. VideoView, SurfaceView,
-         TextureView, etc. -->
-    <TextView android:id="@+id/fullscreen_content" android:layout_width="match_parent"
-        android:layout_height="match_parent" android:keepScreenOn="true" android:textColor="#33b5e5"
-        android:textStyle="bold" android:textSize="50sp" android:gravity="center"
-        android:text="@string/dummy_content" />
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_gravity="bottom"
+        android:layout_weight="9">
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
 
-    <!-- This FrameLayout insets its children based on system windows using
-         android:fitsSystemWindows. -->
-    <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Марка"
+                android:id="@+id/marka_button"
+                android:layout_gravity="center_horizontal"
+                android:onClick="onClick"
+                />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Модель"
+                android:id="@+id/model_button"
+                android:layout_gravity="center_horizontal"
+                android:onClick="onClick"
+                />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Год выпуска"
+                android:id="@+id/year_button"
+                android:layout_gravity="center_horizontal"
+                android:onClick="onClick"
+                />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Цена"
+                android:id="@+id/price_button"
+                android:layout_gravity="center_horizontal"
+                android:onClick="onClick"
+                />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Пробег"
+                android:id="@+id/probeg_button"
+                android:layout_gravity="center_horizontal"
+                android:onClick="onClick"
+                />
 
-        <LinearLayout android:id="@+id/fullscreen_content_controls" style="?metaButtonBarStyle"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:background="@color/black_overlay" android:orientation="horizontal"
-            tools:ignore="UselessParent">
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="КПП"
+                android:id="@+id/trans_button"
+                android:layout_gravity="center_horizontal"
+                android:onClick="onClick"
+                />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Тип кузова"
+                android:id="@+id/body_button"
+                android:layout_gravity="center_horizontal"
+                android:onClick="onClick"
+                />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Тип двигателя"
+                android:id="@+id/engine_button"
+                android:layout_gravity="center_horizontal"
+                android:onClick="onClick"
+                />
 
-            <Button android:id="@+id/buttonSearch" style="?metaButtonBarButtonStyle"
-                android:layout_width="0dp" android:layout_height="wrap_content"
-                android:layout_weight="1" android:text="@string/dummy_button" android:onClick="onClick"/>
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Объём двигателя"
+                android:id="@+id/engine_volume_button"
+                android:layout_gravity="center_horizontal"
+                android:onClick="onClick"
+                />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Привод"
+                android:id="@+id/privod_button"
+                android:layout_gravity="center_horizontal"
+                android:onClick="onClick"
+                />
+            <CheckBox
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Только с фото"
+                android:textSize="10pt"
+                android:id="@+id/checkBox"
+                android:button="@drawable/checker"
+                android:checked="false"
+                android:paddingLeft="10dp"
+                android:paddingTop="9dp"
+                android:paddingRight="10dp"
+                android:paddingBottom="9dp" />
 
         </LinearLayout>
-    </FrameLayout>
+    </ScrollView>
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Марка"
-            android:id="@+id/marka_button"
-            android:layout_gravity="center_horizontal"
-            android:onClick="onClick"
-            />
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Модель"
-            android:id="@+id/model_button"
-            android:layout_gravity="center_horizontal"
-            android:onClick="onClick"
-            />
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Год выпуска"
-            android:id="@+id/year_button"
-            android:layout_gravity="center_horizontal"
-            android:onClick="onClick"
-            />
+    <LinearLayout android:id="@+id/fullscreen_content_controls" style="?metaButtonBarStyle"
+        android:layout_width="match_parent" android:layout_height="fill_parent"
+        android:layout_gravity="bottom|center_horizontal"
+        android:background="@color/black_overlay"
+        tools:ignore="UselessParent"
+        android:layout_weight="91">
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"></LinearLayout>
+
+        <Button android:id="@+id/buttonSearch" style="?metaButtonBarButtonStyle"
+            android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:text="@string/dummy_button" android:onClick="onClick" />
+
     </LinearLayout>
 
-</FrameLayout>
+
+</LinearLayout>
