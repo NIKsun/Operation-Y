@@ -88,6 +88,70 @@ public class Cars {
         lastCar++;
         return true;
     }
+    public static Date getDateAuto(Element elem)
+    {
+        if(elem == null){
+            return null;
+        }
+        Pattern pattern = Pattern.compile("created\":\"([^\"]+)");
+        Matcher matcher = pattern.matcher(elem.attr("data-stat_params"));
+        if(matcher.find()){
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            try {
+                return format.parse(matcher.group(1));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+    public static Date getDateAvito(Element elem)
+    {
+        String[] date = elem.select("div.description > div.data > div").text().split(" ");
+        Date result = new Date();
+        if(date.length == 2)
+        {
+            if(date[0].equals("Сегодня"))
+            {
+                result.setMinutes(Integer.parseInt(date[1].split(":")[1]));
+                result.setHours(Integer.parseInt(date[1].split(":")[0]));
+            }
+            else {
+                result = new Date(System.currentTimeMillis() - 1000L * 60L * 60L * 24L);
+                result.setMinutes(Integer.parseInt(date[1].split(":")[1]));
+                result.setHours(Integer.parseInt(date[1].split(":")[0]));
+            }
+        }
+        else
+        {
+            switch (date[1])
+            {
+                case "января": result.setMonth(0); break;
+                case "февраля": result.setMonth(1); break;
+                case "марта": result.setMonth(2); break;
+                case "апреля": result.setMonth(3); break;
+                case "мая": result.setMonth(4); break;
+                case "июня": result.setMonth(5); break;
+                case "июля": result.setMonth(6); break;
+                case "августа": result.setMonth(7); break;
+                case "сентября": result.setMonth(8); break;
+                case "октября": result.setMonth(9); break;
+                case "ноября": result.setMonth(10); break;
+                case "декабря": result.setMonth(11); break;
+            }
+            result.setMinutes(Integer.parseInt(date[2].split(":")[1]));
+            result.setHours(Integer.parseInt(date[2].split(":")[0]));
+            result.setDate(Integer.parseInt(date[0]));
+        }
+        return result;
+    }
+    public String getLastCarDate()
+    {
+        if(lastCar !=0)
+            return cars[0].timeOfCreate.toString();
+        else
+            return null;
+    }
     public String getMessage(int pos)
     {
         String message = "";

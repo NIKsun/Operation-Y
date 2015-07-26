@@ -12,13 +12,19 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
+import android.util.Log;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
+
+import java.io.IOException;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class MonitoringService extends Service {
     NotificationManager nm;
-    String requestAvito, requestAuto;
-    String lastCarId;
+    String requestAvito, requestAuto, lastCarDate;
 
     Thread mainThread = new Thread(new Runnable() {
         @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -57,29 +63,66 @@ public class MonitoringService extends Service {
 
     void ServiceProcess() throws InterruptedException {
         for (int i = 1; i<=100; i++) {
-            TimeUnit.SECONDS.sleep(120);
+            TimeUnit.SECONDS.sleep(5);
             if(requestAuto == null && requestAvito == null)
                 return;
             SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-            lastCarId = sPref.getString("SearchMyCarLastCarDate","");
+            lastCarDate = sPref.getString("SearchMyCarServiceLastCarDate","");
+
+            Log.i("Service", String.valueOf(Date.parse(lastCarDate)));
+
             Thread t = new Thread(new Runnable() {
                 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
                 public void run() {
-                    try {
+                    Document doc;
+                    Elements mainElems;
+                    int counter = 0;
+                    if(!requestAuto.equals("###")) {
+                        try {
+                            doc = Jsoup.connect(requestAuto).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").get();
+                        } catch (IOException e) {
+                            return;
+                        }
+                        mainElems = doc.select("body > div.branding_fix > div.content.content_style > article > div.clearfix > div.b-page-wrapper > div.b-page-content").first().children();
 
+                        Elements listOfCars = null;
+                        for (int i = 0; i < mainElems.size(); i++) {
+                            String className = mainElems.get(i).className();
+                            if ((className.indexOf("widget widget_theme_white sales-list") == 0) && (className.length() == 36)) {
+                                listOfCars = mainElems.get(i).select("div.sales-list-item");
+                                break;
+                            }
+                        }
+                        if (listOfCars == null) {
+                            return;
+                        }
+                        for (int i = 0; i < listOfCars.size(); i++) {
+                            Log.i("Service111", String.valueOf(Cars.getDateAuto(listOfCars.get(i).select("table > tbody > tr").first())));
+                        }
+                    }
+                    if(!requestAvito.equals("###")) {
+                        try {
+                            doc = Jsoup.connect(requestAvito).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").get();
+                        } catch (Exception e) {
+                            return;
+                        }
+                        mainElems = doc.select("#catalog > div.layout-internal.col-12.js-autosuggest__search-list-container > div.l-content.clearfix > div.clearfix > div.catalog.catalog_table > div.catalog-list.clearfix").first().children();
+                        int length = 0;
+                        for (int i = 0; i < mainElems.size(); i++)
+                            length += mainElems.get(i).children().size();
 
-
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                        for (int i = 0; i < mainElems.size(); i++)
+                            for (int j = 0; j < mainElems.get(i).children().size(); j++) {
+                                Log.i("Service222", String.valueOf(Cars.getDateAvito(mainElems.get(i).children().get(j))));
+                            }
                     }
                 }
             });
             t.start();
             while (t.isAlive());
-            if(Integer.parseInt(answer[0]) != 0) {
+            /*if(Integer.parseInt(answer[0]) != 0) {
                 sendNotification(answer[0]);
-            }
+            }*/
         }
     }
 

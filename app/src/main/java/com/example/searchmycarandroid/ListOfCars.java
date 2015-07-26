@@ -40,7 +40,7 @@ import java.util.List;
 public class ListOfCars extends Activity {
     Toast toastErrorConnection, toastErrorCarList;
     AlertDialog.Builder ad;
-    String lastCarID;
+    String requestAvito, requestAuto, lastCarDate;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,10 +61,9 @@ public class ListOfCars extends Activity {
                 SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
                 SharedPreferences.Editor ed = sPref.edit();
                 stopService(new Intent(ListOfCars.this, MonitoringService.class));
-                String request = sPref.getString("SearchMyCarRequest", "");
-
-                ed.putString("SearchMyCarRequestService", request);
-                ed.putString("SearchMyCarLastCarID", lastCarID);
+                ed.putString("SearchMyCarServiceRequestAuto", requestAuto);
+                ed.putString("SearchMyCarServiceRequestAvito", requestAvito);
+                ed.putString("SearchMyCarServiceLastCarDate", lastCarDate);
                 ed.commit();
 
                 startService(new Intent(ListOfCars.this, MonitoringService.class));
@@ -86,8 +85,8 @@ public class ListOfCars extends Activity {
         });
 
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-        String requestAuto = sPref.getString("SearchMyCarRequest", "");
-        String requestAvito = sPref.getString("SearchMyCarRequestAvito", "");
+        requestAuto = sPref.getString("SearchMyCarRequest", "");
+        requestAvito = sPref.getString("SearchMyCarRequestAvito", "");
         loader.execute(requestAuto,requestAvito);
     }
 
@@ -110,17 +109,6 @@ public class ListOfCars extends Activity {
         @TargetApi(Build.VERSION_CODES.HONEYCOMB)
         @Override
         protected Cars doInBackground(final String... params) {
-
-            /*
-            lastCarID = autoInfoArr[autoInfoArr.length - 1];
-            SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-            Boolean IsFromService = sPref.getBoolean("SearchMyCarIsFromService", false);
-            if(IsFromService)
-            {
-                SharedPreferences.Editor ed = sPref.edit();
-                ed.putString("SearchMyCarLastCarID", lastCarID);
-                ed.commit();
-            }*/
 
             final Boolean[] bulAvto = {true}, bulAvito = {true}, connectionSuccess = {true};
             Thread threadAvto = new Thread(new Runnable() {
@@ -221,6 +209,18 @@ public class ListOfCars extends Activity {
             images = new Bitmap[cars.getLenth()];
             for(int i=0;i<cars.getLenth();i++)
                 images[i] = LoadingImage;
+
+
+
+            lastCarDate = cars.getLastCarDate();
+            /*SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+            Boolean IsFromService = sPref.getBoolean("SearchMyCarIsFromService", false);
+            if(IsFromService)
+            {
+                SharedPreferences.Editor ed = sPref.edit();
+                ed.putString("SearchMyCarLastCarID", lastCarID);
+                ed.commit();
+            }*/
 
             return cars;
         }
