@@ -13,9 +13,11 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -60,13 +62,15 @@ public class ListOfCars extends Activity {
 
                 SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
                 SharedPreferences.Editor ed = sPref.edit();
-                stopService(new Intent(ListOfCars.this, MonitoringService.class));
-                ed.putString("SearchMyCarServiceRequestAuto", requestAuto);
-                ed.putString("SearchMyCarServiceRequestAvito", requestAvito);
-                ed.putString("SearchMyCarServiceLastCarDate", lastCarDate);
+                //stopService(new Intent(ListOfCars.this, MonitoringService.class));
+                Intent serviceIntent = new Intent(ListOfCars.this, MonitoringService.class);
+                ed.putString("SearchMyCarServiceRequestAuto1", requestAuto);
+                ed.putString("SearchMyCarServiceRequestAvito1", requestAvito);
+                ed.putString("SearchMyCarServiceLastCarDate1", lastCarDate);
                 ed.commit();
+                serviceIntent.putExtra("SearchMyCarNumberOfService", 1);
 
-                startService(new Intent(ListOfCars.this, MonitoringService.class));
+                startService(serviceIntent);
 
                 Toast.makeText(ListOfCars.this, "Новый монитор запущен", Toast.LENGTH_SHORT).show();
             }
@@ -87,7 +91,14 @@ public class ListOfCars extends Activity {
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         requestAuto = sPref.getString("SearchMyCarRequest", "");
         requestAvito = sPref.getString("SearchMyCarRequestAvito", "");
-        loader.execute(requestAuto,requestAvito);
+        loader.execute(requestAuto, requestAvito);
+
+        Button b = (Button) findViewById(R.id.buttonSearch1);
+        b.setText(Html.fromHtml("Монитор 1<br><font color=green face=cursive>запущен</font>"));
+        b = (Button) findViewById(R.id.buttonSearch2);
+        b.setText(Html.fromHtml("Монитор 2<br><font color=#2E2E2E face=cursive>выключен</font>"));
+        b = (Button) findViewById(R.id.buttonSearch3);
+        b.setText(Html.fromHtml("Монитор 2<br><font color=#2E2E2E face=cursive>выключен</font>"));
     }
 
     public void onClickStart(View v) {
@@ -143,7 +154,8 @@ public class ListOfCars extends Activity {
                     carsAvto[0] = new Cars(listOfCars.size());
                     for(int i=0;i<listOfCars.size();i++)
                     {
-                        carsAvto[0].addFromAutoRu(listOfCars.get(i).select("table > tbody > tr").first());
+                        if(!carsAvto[0].addFromAutoRu(listOfCars.get(i).select("table > tbody > tr").first()))
+                            Log.i("Service","now");
                     }
                 }
             });
@@ -198,7 +210,6 @@ public class ListOfCars extends Activity {
                 toastErrorCarList.show();
                 return null;
             }
-
             if(!bulAvito[0])
                 carsAvito[0] = new Cars(0);
             if(!bulAvto[0])
@@ -210,17 +221,7 @@ public class ListOfCars extends Activity {
             for(int i=0;i<cars.getLenth();i++)
                 images[i] = LoadingImage;
 
-
-
             lastCarDate = cars.getLastCarDate();
-            /*SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-            Boolean IsFromService = sPref.getBoolean("SearchMyCarIsFromService", false);
-            if(IsFromService)
-            {
-                SharedPreferences.Editor ed = sPref.edit();
-                ed.putString("SearchMyCarLastCarID", lastCarID);
-                ed.commit();
-            }*/
 
             return cars;
         }
@@ -239,8 +240,7 @@ public class ListOfCars extends Activity {
                     + carsAvito[0].getLenth() + " на Avito.ru, отсортировано по дате", Toast.LENGTH_LONG).show();
 
             ListView lv = (ListView) findViewById(R.id.listView);
-            SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-            lv.setAdapter(new ListViewAdapter(ListOfCars.this, result, images, sPref.getInt("SearchMyCarCountOfNewCars", 0)));
+            lv.setAdapter(new ListViewAdapter(ListOfCars.this, result, images, 0));
 
 
             imagesRef = new String[result.getLenth()];

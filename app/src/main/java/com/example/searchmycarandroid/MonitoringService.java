@@ -26,16 +26,20 @@ public class MonitoringService extends Service {
     NotificationManager nm;
     String requestAvito, requestAuto, lastCarDate;
 
-    Thread mainThread = new Thread(new Runnable() {
+    public class ServiceThread implements Runnable {
+        public int serviceId;
+        public ServiceThread(int Id) {
+            this.serviceId=Id;
+        }
         @TargetApi(Build.VERSION_CODES.HONEYCOMB)
         public void run() {
             try {
-                ServiceProcess();
+                ServiceProcess(serviceId);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-    });
+    }
 
     public void onCreate() {
         super.onCreate();
@@ -46,7 +50,10 @@ public class MonitoringService extends Service {
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         requestAuto = sPref.getString("SearchMyCarServiceRequestAuto", "");
         requestAvito = sPref.getString("SearchMyCarServiceRequestAvito", "");
-        mainThread.start();
+        Runnable st = new ServiceThread(intent.getIntExtra("SearchMyCarNumberOfService",-1));
+        Log.i("Service", String.valueOf(startId) + " " + intent.getIntExtra("SearchMyCarNumberOfService",-1));
+
+        new Thread(st).start();
 
         return START_STICKY;
     }
@@ -61,22 +68,21 @@ public class MonitoringService extends Service {
     }
 
 
-    void ServiceProcess() throws InterruptedException {
+    void ServiceProcess(int ID) throws InterruptedException {
         for (int i = 1; i<=100; i++) {
-            TimeUnit.SECONDS.sleep(5);
+            TimeUnit.SECONDS.sleep(60);
             if(requestAuto == null && requestAvito == null)
                 return;
             SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
             lastCarDate = sPref.getString("SearchMyCarServiceLastCarDate","");
-
-            Log.i("Service", String.valueOf(Date.parse(lastCarDate)));
+            final long lastCarDateinMs = Date.parse(lastCarDate);
+            final int[] counter = {0};
 
             Thread t = new Thread(new Runnable() {
                 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
                 public void run() {
                     Document doc;
                     Elements mainElems;
-                    int counter = 0;
                     if(!requestAuto.equals("###")) {
                         try {
                             doc = Jsoup.connect(requestAuto).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").get();
@@ -96,8 +102,11 @@ public class MonitoringService extends Service {
                         if (listOfCars == null) {
                             return;
                         }
+                        Date buf;
                         for (int i = 0; i < listOfCars.size(); i++) {
-                            Log.i("Service111", String.valueOf(Cars.getDateAuto(listOfCars.get(i).select("table > tbody > tr").first())));
+                            buf = Cars.getDateAuto(listOfCars.get(i).select("table > tbody > tr").first());
+                            if(buf != null && lastCarDateinMs < buf.getTime())
+                                counter[0]++;
                         }
                     }
                     if(!requestAvito.equals("###")) {
@@ -107,26 +116,24 @@ public class MonitoringService extends Service {
                             return;
                         }
                         mainElems = doc.select("#catalog > div.layout-internal.col-12.js-autosuggest__search-list-container > div.l-content.clearfix > div.clearfix > div.catalog.catalog_table > div.catalog-list.clearfix").first().children();
-                        int length = 0;
-                        for (int i = 0; i < mainElems.size(); i++)
-                            length += mainElems.get(i).children().size();
 
                         for (int i = 0; i < mainElems.size(); i++)
                             for (int j = 0; j < mainElems.get(i).children().size(); j++) {
-                                Log.i("Service222", String.valueOf(Cars.getDateAvito(mainElems.get(i).children().get(j))));
+                                if(lastCarDateinMs < Cars.getDateAvito(mainElems.get(i).children().get(j)).getTime())
+                                    counter[0]++;
                             }
                     }
                 }
             });
             t.start();
             while (t.isAlive());
-            /*if(Integer.parseInt(answer[0]) != 0) {
-                sendNotification(answer[0]);
-            }*/
+            if(counter[0] != 0) {
+                sendNotification(counter[0], ID);
+            }
         }
     }
 
-    void sendNotification(String countOfNewCars) {
+    void sendNotification(int countOfNewCars, int serviceID) {
 
         Notification notif = new Notification(R.drawable.status_bar, "Новое авто!",
                 System.currentTimeMillis());
@@ -136,15 +143,15 @@ public class MonitoringService extends Service {
 
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         SharedPreferences.Editor ed = sPref.edit();
-        ed.putInt("SearchMyCarCountOfNewCars", Integer.parseInt(countOfNewCars));
+        ed.putInt("SearchMyCarServiceOutput", serviceID);
         ed.commit();
 
-        if(countOfNewCars == "1")
-            notif.setLatestEventInfo(this, "SearchMyAuto", "Найдено "+countOfNewCars+" новый авто", pIntent);
+        if(countOfNewCars == 1)
+            notif.setLatestEventInfo(this, "SearchMyAuto", "Найден "+countOfNewCars+" новый авто", pIntent);
         else
             notif.setLatestEventInfo(this, "SearchMyAuto", "Найдено "+countOfNewCars+" новых авто", pIntent);
         Uri ringURI = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        notif.number = Integer.parseInt(countOfNewCars);
+        notif.number = countOfNewCars;
         notif.sound = ringURI;
         notif.flags |= Notification.FLAG_AUTO_CANCEL | Notification.DEFAULT_SOUND | Notification.FLAG_ONLY_ALERT_ONCE;
         nm.notify(1, notif);

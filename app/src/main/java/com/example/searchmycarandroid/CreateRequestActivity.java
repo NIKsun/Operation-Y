@@ -140,7 +140,7 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 ed.putString("SearchMyCarRequestAvito", requestavito);
 
                 ed.putBoolean("SearchMyCarIsFromService", false);
-                ed.putInt("SearchMyCarCountOfNewCars", 0);
+                ed.putInt("SearchMyCarServiceID", -1);
                 ed.commit();
                 startActivity(intent);
 

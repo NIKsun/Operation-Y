@@ -18,12 +18,8 @@ public class NotificationActivity extends Activity {
         Intent intent = new Intent(this, ListOfCars.class);
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         SharedPreferences.Editor ed = sPref.edit();
-        String request = sPref.getString("SearchMyCarRequestService", "");
-        Log.d("Service:NotificationActivity", request);
-        ed.putString("SearchMyCarRequest", request);
-        ed.putBoolean("SearchMyCarIsFromService", true);
-        Integer a = sPref.getInt("SearchMyCarCountOfNewCars", 0);
-        Log.d("Style", a.toString());
+        int serviceID = sPref.getInt("SearchMyCarServiceOutput", -1);
+        ed.putInt("SearchMyCarServiceID", serviceID);
         ed.commit();
         startActivity(intent);
         finish();
