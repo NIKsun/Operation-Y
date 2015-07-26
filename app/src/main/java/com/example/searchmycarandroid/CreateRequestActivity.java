@@ -73,6 +73,7 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
         setContentView(R.layout.activity_create_request);
         dbHelper = new DBHelper(this);
 
+        // clear year
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         sPref.edit().putInt("StartYear", 1970).commit();
         sPref.edit().putInt("EndYear", 2015).commit();
@@ -277,13 +278,22 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
         final NumberPicker np1 = (NumberPicker) dialogPicker.findViewById(R.id.numberPicker1);
         final NumberPicker np2 = (NumberPicker) dialogPicker.findViewById(R.id.numberPicker2);
 
-        np1.setMinValue(1970);
-        np1.setMaxValue(1900 + new Date().getYear());
-        np1.setValue(2006);
+        Integer count_year = 1900 + new Date().getYear() - 1970 - 9 -4 -4 +1;
+        np1.setMinValue(1);
+        np1.setMaxValue(count_year);
+        np2.setMinValue(1);
+        np2.setMaxValue(count_year);
 
-        np2.setMinValue(1970);
-        np2.setMaxValue(1900 + new Date().getYear());
-        np2.setValue(2015);
+        final String[] year_arr = new String[count_year];
+        year_arr[0]="1970";
+        year_arr[1]="1980";
+        year_arr[2]="1985";
+        year_arr[3]="1990";
+        for(int i=4; i<year_arr.length; ++i){
+            year_arr[i] = String.valueOf(Integer.parseInt(year_arr[i - 1])+1);
+        }
+        np1.setDisplayedValues(year_arr);
+        np2.setDisplayedValues(year_arr);
 
         Button ok = (Button) dialogPicker.findViewById(R.id.buttonPicker);
         ok.setOnClickListener(new OnClickListener()
@@ -292,11 +302,11 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
             public void onClick(View v) {
 
                 SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-                sPref.edit().putInt("StartYear", np1.getValue()).commit();
-                sPref.edit().putInt("EndYear", np2.getValue()).commit();
+                sPref.edit().putInt("StartYear", Integer.parseInt(year_arr[np1.getValue() - 1])).commit();
+                sPref.edit().putInt("EndYear", Integer.parseInt(year_arr[np2.getValue() - 1])).commit();
 
                 Button b2 = (Button) findViewById(R.id.year_button);
-                b2.setText("Год выпуска: с "+np1.getValue()+" по "+np2.getValue());
+                b2.setText("Год выпуска: с "+year_arr[np1.getValue() - 1]+" по "+year_arr[np2.getValue() - 1]);
 
 
                 dialogPicker.dismiss();
@@ -370,26 +380,26 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
         final NumberPicker np1 = (NumberPicker) dialogPicker.findViewById(R.id.numberPicker1);
         final NumberPicker np2 = (NumberPicker) dialogPicker.findViewById(R.id.numberPicker2);
 
-        Integer count_price = 26;
+        Integer count_volume = 26;
         np1.setMinValue(1);
-        np1.setMaxValue(count_price);
+        np1.setMaxValue(count_volume);
         np2.setMinValue(1);
-        np2.setMaxValue(count_price);
+        np2.setMaxValue(count_volume);
 
-        final String[] price_arr = new String[count_price];
-        for(int i=0; i<price_arr.length; ++i){
+        final String[] value_arr = new String[count_volume];
+        for(int i=0; i<value_arr.length; ++i){
             if(i<16){
-                price_arr[i]= String.valueOf(Float.parseFloat(String.valueOf(i))*0.2);
+                value_arr[i] = String.valueOf(round((float) (Float.parseFloat(String.valueOf(i))*0.2),1));
                 continue;
             }
             if(i<22){
-                price_arr[i]= String.valueOf(Float.parseFloat(price_arr[i - 1])+0.5);
+                value_arr[i]= String.valueOf(Float.parseFloat(value_arr[i - 1])+0.5);
                 continue;
             }
-           price_arr[i] = String.valueOf(Float.parseFloat(price_arr[i - 1]) + 1.0);
+            value_arr[i] = String.valueOf(Float.parseFloat(value_arr[i - 1]) + 1.0);
         }
-        np1.setDisplayedValues(price_arr);
-        np2.setDisplayedValues(price_arr);
+        np1.setDisplayedValues(value_arr);
+        np2.setDisplayedValues(value_arr);
 
 
 
@@ -401,16 +411,23 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
             public void onClick(View v) {
 
                 SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-                sPref.edit().putInt("StartVolume", Integer.parseInt(price_arr[np1.getValue() - 1])).commit();
-                sPref.edit().putInt("EndVolume", Integer.parseInt(price_arr[np2.getValue() - 1])).commit();
+                sPref.edit().putInt("StartVolume", Integer.parseInt(value_arr[np1.getValue() - 1])).commit();
+                sPref.edit().putInt("EndVolume", Integer.parseInt(value_arr[np2.getValue() - 1])).commit();
 
                 Button b2 = (Button) findViewById(R.id.price_button);
-                b2.setText("Объём : от "+price_arr[np1.getValue()-1]+" до "+price_arr[np2.getValue() - 1]);
+                b2.setText("Объём : от "+value_arr[np1.getValue()-1]+" до "+value_arr[np2.getValue() - 1]);
 
 
                 dialogPicker.dismiss();
             }
         });
         dialogPicker.show();
+    }
+    private static float round(float number, int scale) {
+        int pow = 10;
+        for (int i = 1; i < scale; i++)
+            pow *= 10;
+        float tmp = number * pow;
+        return (float) (int) ((tmp - (int) tmp) >= 0.5f ? tmp + 1 : tmp) / pow;
     }
 }
