@@ -37,39 +37,68 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
     @Override
     protected void onResume(){
         super.onResume();
+        Button b = (Button) findViewById(R.id.marka_button);
+        Button b1 = (Button) findViewById(R.id.model_button);
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         if(sPref.contains("SelectedMark"))
         {
-            SQLiteDatabase db = dbHelper.getWritableDatabase();
+//nen
 
-            Button b = (Button) findViewById(R.id.marka_button);
-            Integer posMark = sPref.getInt("SelectedMark", 0)+1;
-
-            Cursor cursorMark = db.query("marksTable", null, "id=?", new String[]{posMark.toString()}, null, null, null);
-            cursorMark.moveToFirst();
-            String marka = cursorMark.getString(cursorMark.getColumnIndex("markauser"));
-
-            b.setText(marka);
-
-            if(sPref.contains("SelectedModel"))
+            Integer posMark = sPref.getInt("SelectedMark", 0);
+            if(posMark==0)
             {
-                Button b1 = (Button) findViewById(R.id.model_button);
-                Integer posModel = sPref.getInt("SelectedModel", 0)+1;
+                sPref.edit().putInt("SelectedModel", 0).commit();
+                b.setText("Марка");
+                b1.setText("Модель");
+                Button b5 = (Button) findViewById(R.id.clear_marka);
+                b5.setVisibility(View.INVISIBLE);
+            }
+            else{
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-                Cursor cursorModel = db.query("modelsTable", null, "marka_id=?", new String[]{posMark.toString()}, null, null, null);
-                cursorModel.moveToFirst();
-                int i = 1;
-                while(i<posModel){
-                    cursorModel.moveToNext();
-                    ++i;
+
+                Cursor cursorMark = db.query("marksTable", null, "id=?", new String[]{posMark.toString()}, null, null, null);
+                cursorMark.moveToFirst();
+                String marka = cursorMark.getString(cursorMark.getColumnIndex("markauser"));
+
+                b.setText(marka);
+
+                Button b3 = (Button) findViewById(R.id.clear_marka);
+                b3.setVisibility(View.VISIBLE);
+
+                if(sPref.contains("SelectedModel"))
+                {
+
+//nen
+                    Integer posModel = sPref.getInt("SelectedModel", 0);
+
+
+                    if(posModel==0){
+                        b1.setText("Модель");
+                        Button b5 = (Button) findViewById(R.id.clear_model);
+                        b5.setVisibility(View.INVISIBLE);
+                    }
+                    else{
+
+                        Cursor cursorModel = db.query("modelsTable", null, "marka_id=?", new String[]{posMark.toString()}, null, null, null);
+                        cursorModel.moveToFirst();
+                        int i = 1;
+                        while(i<posModel){
+                            cursorModel.moveToNext();
+                            ++i;
+                        }
+                        String model = cursorModel.getString(cursorModel.getColumnIndex("modeluser"));
+
+                        b1.setText(model);
+                        Button b4 = (Button) findViewById(R.id.clear_model);
+                        b4.setVisibility(View.VISIBLE);
+                    }
+
                 }
-                String model = cursorModel.getString(cursorModel.getColumnIndex("modeluser"));
-
-                b1.setText(model);
-
+                db.close();
             }
 
-            db.close();
+
         }
 
     }
@@ -109,9 +138,6 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
                 SharedPreferences.Editor ed = sPref.edit();
 
-                Integer posMark = sPref.getInt("SelectedMark", 0)+1;
-                Integer posModel = sPref.getInt("SelectedModel",0)+1;
-
                 Integer startYear = sPref.getInt("StartYear",1970);
                 Integer endYear = sPref.getInt("EndYear",2015);
 
@@ -130,7 +156,7 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 String[] probeg_arr_avto = new String[]{"0","5000","10000","15000","20000","25000","30000","35000","40000","45000","50000","55000", "60000", "65000", "70000","75000","80000","85000","90000","95000","100000","110000","120000","130000","140000","150000","160000","170000","180000","190000","200000","210000","220000","230000","240000","250000","260000","270000","280000","290000","300000","310000","320000","330000","340000","350000","360000","370000","380000","390000","400000","410000","420000","430000","440000","450000","460000","470000","480000","490000","500000","100000000"};
                 String[] probeg_arr_avito = new String[]{"15483", "15486", "15487", "15490", "15492", "15494", "15496", "15498", "15500", "15502", "15505", "15506", "15509", "15510", "15512", "15513", "15516", "15517", "15520", "15521", "15524", "15527", "15528", "15531", "15533", "15535", "15536", "15539", "15540", "15542", "15544", "15545", "15546", "15547", "15548", "15554", "15556", "15557", "15558", "15559", "15560", "15561", "15562", "15563", "15564", "15565", "15566", "15567", "15568", "15569", "15570", "15571", "15572", "15573", "15574", "15575", "15576", "15577", "15578", "15579", "15581", "15582"};
                 //constructor for auto.ru
-                String begin = "http://auto.ru/cars/";
+                String begin = "http://auto.ru/cars";
                 String end = "/all/?sort%5Bcreate_date%5D=desc";
                 String year1="&search%5Byear%5D%5Bmin%5D=";
                 String year2="&search%5Byear%5D%5Bmax%5D=";
@@ -142,7 +168,7 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 String probeg = "&search%5Brun%5D%5Bmax%5D="+probeg_arr_avto[probegval]+"%D0%BA%D0%BC";
 
                 //constructor for avito
-                String begin_avito = "https://www.avito.ru/rossiya/avtomobili/";
+                String begin_avito = "https://www.avito.ru/rossiya/avtomobili";
                 Map<Integer, String> map = new HashMap<Integer, String>();
                 //region map create
                 map.put(1970,"782");
@@ -193,32 +219,42 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 }
 
 
-
+//тут
+                Integer posMark = sPref.getInt("SelectedMark", 0);
+                Integer posModel = sPref.getInt("SelectedModel",0);
 
                 //get mark
-                Cursor cursorMark = db.query("marksTable", null, "id=?", new String[]{posMark.toString()}, null, null, null);
-                cursorMark.moveToFirst();
-                String marka = cursorMark.getString(cursorMark.getColumnIndex("markarequest"));
-                String markaavito = cursorMark.getString(cursorMark.getColumnIndex("markarequestavito"));
-
-                //get model
-                Cursor cursorModel = db.query("modelsTable", null, "marka_id=?", new String[]{posMark.toString()}, null, null, null);
-                cursorModel.moveToFirst();
-                int i = 1;
-                while(i<posModel){
-                    cursorModel.moveToNext();
-                    ++i;
+                String marka = "";
+                String markaavito = "";
+                if(posMark!=0) {
+                    Cursor cursorMark = db.query("marksTable", null, "id=?", new String[]{posMark.toString()}, null, null, null);
+                    cursorMark.moveToFirst();
+                    marka = "/" + cursorMark.getString(cursorMark.getColumnIndex("markarequest"));
+                    markaavito = "/" + cursorMark.getString(cursorMark.getColumnIndex("markarequestavito"));
                 }
-                String model = cursorModel.getString(cursorModel.getColumnIndex("modelrequest"));
-                String modelavito = cursorModel.getString(cursorModel.getColumnIndex("modelrequestavito"));
+                //get model
+                String model = "";
+                String modelavito = "";
+                if(posModel!=0) {
+                    Cursor cursorModel = db.query("modelsTable", null, "marka_id=?", new String[]{posMark.toString()}, null, null, null);
+                    cursorModel.moveToFirst();
+                    int i = 1;
+                    while (i < posModel) {
+                        cursorModel.moveToNext();
+                        ++i;
+                    }
+
+                    model = "/" + cursorModel.getString(cursorModel.getColumnIndex("modelrequest"));
+                    modelavito = "/" + cursorModel.getString(cursorModel.getColumnIndex("modelrequestavito"));
+                }
 
                 //put two request
                 String requestauto = "###";
                 String requestavito = "###";
                 if(!(marka.equals("###")) && !(model.equals("###")))
-                    requestauto = begin + marka + "/" + model + end + year1 + startYear.toString() + year2 + endYear.toString() + price1 + price2+photo+eng_vol1+volume_arr_avto[startVolume]+eng_vol2+volume_arr_avto[endVolume]+probeg;
+                    requestauto = begin + marka + model + end + year1 + startYear.toString() + year2 + endYear.toString() + price1 + price2+photo+eng_vol1+volume_arr_avto[startVolume]+eng_vol2+volume_arr_avto[endVolume]+probeg;
                 if(!(markaavito.equals("###")) && !(modelavito.equals("###")))
-                    requestavito = begin_avito+markaavito+"/"+modelavito+"/?"+photoa+price1a+startPrice+price2a+endPrice+"&f="+year1a+startYearAvito+year2a+endYearAvito+"."+eng_vol1a+volume_arr_avito[startVolume]+eng_vol2a+volume_arr_avito[endVolume]+"."+probega;
+                    requestavito = begin_avito+markaavito+modelavito+"/?"+photoa+price1a+startPrice+price2a+endPrice+"&f="+year1a+startYearAvito+year2a+endYearAvito+"."+eng_vol1a+volume_arr_avito[startVolume]+eng_vol2a+volume_arr_avito[endVolume]+"."+probega;
                 ed.putString("SearchMyCarRequest", requestauto);
                 ed.putString("SearchMyCarRequestAvito", requestavito);
 
@@ -235,7 +271,7 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 sPref.edit().putInt("SelectedModel", 0).commit();
 
                 Cursor cursor = db.query("marksTable", null, null, null, null, null, null);
-                String strToParse = "";
+                String strToParse = "Любая@@@";
 
                 if (cursor.moveToFirst()) {
                     int MarkColIndex = cursor.getColumnIndex("markauser");
@@ -252,9 +288,15 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
             case R.id.model_button:
 
                 SharedPreferences sPref2 = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-                Integer pos = sPref2.getInt("SelectedMark",0)+1;
+//тут
+                Integer pos = sPref2.getInt("SelectedMark",0);
+                if(pos==0){
+                    Toast t = Toast.makeText(getApplicationContext(),"Для начала выберите марку",Toast.LENGTH_SHORT);
+                    t.show();
+                    break;
+                }
                 Cursor cursor2 = db.query("modelsTable", null, "marka_id=?", new String[]{pos.toString()}, null, null, null);
-                String strToParse2 = "";
+                String strToParse2 = "Любая@@@";
 
                 if (cursor2.moveToFirst()) {
                     int ModelColIndex = cursor2.getColumnIndex("modeluser");
@@ -415,7 +457,10 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                     sPref.edit().putInt("EndYear", Integer.parseInt(year_arr[np2.getValue() - 1])).commit();
 
                     Button b2 = (Button) findViewById(R.id.year_button);
-                    b2.setText("Год выпуска: с "+year_arr[np1.getValue() - 1]+" по "+year_arr[np2.getValue() - 1]);
+                    b2.setText("Год выпуска: с " + year_arr[np1.getValue() - 1] + " по " + year_arr[np2.getValue() - 1]);
+
+                    Button b3 = (Button) findViewById(R.id.clear_year);
+                    b3.setVisibility(View.VISIBLE);
 
 
                     dialogPicker.dismiss();
@@ -494,6 +539,8 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                     Button b2 = (Button) findViewById(R.id.price_button);
                     b2.setText("Цена: от " + price_arr[np1.getValue() - 1] + " до " + price_arr[np2.getValue() - 1]);
 
+                    Button b3 = (Button) findViewById(R.id.clear_price);
+                    b3.setVisibility(View.VISIBLE);
 
                     dialogPicker.dismiss();
                 }
@@ -550,6 +597,8 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                     Button b2 = (Button) findViewById(R.id.engine_volume_button);
                     b2.setText("Объём : от " + value_arr[np1.getValue() - 1] + " до " + value_arr[np2.getValue() - 1]);
 
+                    Button b3 = (Button) findViewById(R.id.clear_enginevolume);
+                    b3.setVisibility(View.VISIBLE);
 
                     dialogPicker.dismiss();
                 }
@@ -583,7 +632,10 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 sPref.edit().putInt("Probeg", np1.getValue() - 1).commit();
 
                 Button b2 = (Button) findViewById(R.id.probeg_button);
-                b2.setText("Пробег до : "+ probeg_arr[np1.getValue()-1] + " тыс. км.");
+                b2.setText("Пробег до : " + probeg_arr[np1.getValue() - 1] + " тыс. км.");
+
+                Button b3 = (Button) findViewById(R.id.clear_probeg);
+                b3.setVisibility(View.VISIBLE);
 
                 dialogPicker.dismiss();
 
@@ -592,11 +644,67 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
         dialogPicker.show();
     }
 
-    private static float round(float number, int scale) {
-        int pow = 10;
-        for (int i = 1; i < scale; i++)
-            pow *= 10;
-        float tmp = number * pow;
-        return (float) (int) ((tmp - (int) tmp) >= 0.5f ? tmp + 1 : tmp) / pow;
+    public void clearClick(View v) {
+        SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+        Button b2;
+        Button b3;
+        switch (v.getId()) {
+            case R.id.clear_year:
+                // clear year
+                sPref.edit().putInt("StartYear", 1970).commit();
+                sPref.edit().putInt("EndYear", 1900 + new Date().getYear()).commit();
+                b2 = (Button) findViewById(R.id.year_button);
+                b2.setText("Год выпуска");
+                b3 = (Button) findViewById(R.id.clear_year);
+                b3.setVisibility(View.INVISIBLE);
+                break;
+            case R.id.clear_price:
+                //clear price
+                sPref.edit().putInt("StartPrice", 0).commit();
+                sPref.edit().putInt("EndPrice", 10000000).commit();
+                b2 = (Button) findViewById(R.id.price_button);
+                b2.setText("Цена");
+                b3 = (Button) findViewById(R.id.clear_price);
+                b3.setVisibility(View.INVISIBLE);
+                break;
+            case R.id.clear_enginevolume:
+                //clear engine volume
+                sPref.edit().putInt("StartVolume", 0).commit();
+                sPref.edit().putInt("EndVolume", 36).commit();
+                b2 = (Button) findViewById(R.id.engine_volume_button);
+                b2.setText("Объём двигателя");
+                b3 = (Button) findViewById(R.id.clear_enginevolume);
+                b3.setVisibility(View.INVISIBLE);
+                break;
+            case R.id.clear_probeg:
+                //clear probeg
+                sPref.edit().putInt("Probeg", 61).commit();
+                b2 = (Button) findViewById(R.id.probeg_button);
+                b2.setText("Пробег");
+                b3 = (Button) findViewById(R.id.clear_probeg);
+                b3.setVisibility(View.INVISIBLE);
+                break;
+            case R.id.clear_marka:
+                b2 = (Button) findViewById(R.id.marka_button);
+                b2.setText("Марка");
+
+                sPref.edit().putInt("SelectedMark", 0).commit();
+                sPref.edit().putInt("SelectedModel", 0).commit();
+
+                b3 = (Button) findViewById(R.id.clear_marka);
+                b3.setVisibility(View.INVISIBLE);
+            case R.id.clear_model:
+                b2 = (Button) findViewById(R.id.model_button);
+                b2.setText("Модель");
+
+                sPref.edit().putInt("SelectedModel", 0).commit();
+
+                b3 = (Button) findViewById(R.id.clear_model);
+                b3.setVisibility(View.INVISIBLE);
+                break;
+            default:
+                break;
+
+        }
     }
 }

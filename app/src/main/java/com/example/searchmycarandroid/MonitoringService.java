@@ -133,6 +133,7 @@ public class MonitoringService extends Service {
             if(counter[0] != 0) {
                 sendNotification(counter[0], serviceID);
             }
+
         }
     }
 

@@ -15,23 +15,52 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             >
-
-            <Button
-                android:layout_width="match_parent"
+            <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Марка"
-                android:id="@+id/marka_button"
-                android:layout_gravity="center_horizontal"
-                android:onClick="onClick"
-                />
-            <Button
-                android:layout_width="match_parent"
+                >
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Марка"
+                    android:id="@+id/marka_button"
+                    android:layout_gravity="center_horizontal"
+                    android:onClick="onClick"
+                    />
+                    <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableEnd="@drawable/krest"
+                    android:id="@+id/clear_marka"
+                    android:layout_gravity="right"
+                    android:paddingRight="12dp"
+                    android:background="#00ffffff"
+                    android:onClick="clearClick"
+                    android:visibility="invisible"/>
+            </FrameLayout>
+            <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Модель"
-                android:id="@+id/model_button"
-                android:layout_gravity="center_horizontal"
-                android:onClick="onClick"
-                />
+                >
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Модель"
+                    android:id="@+id/model_button"
+                    android:layout_gravity="center_horizontal"
+                    android:onClick="onClick"
+                    />
+                    <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableEnd="@drawable/krest"
+                    android:id="@+id/clear_model"
+                    android:layout_gravity="right"
+                    android:paddingRight="12dp"
+                    android:background="#00ffffff"
+                    android:onClick="clearClick"
+                    android:visibility="invisible"/>
+            </FrameLayout>
             <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -47,71 +76,166 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:drawableEnd="@drawable/krest"
-                    android:id="@+id/year_button1"
+                    android:id="@+id/clear_year"
                     android:layout_gravity="right"
                     android:paddingRight="12dp"
-
-
-                    android:background="#00ffffff" />
+                    android:background="#00ffffff"
+                    android:onClick="clearClick"
+                    android:visibility="invisible"/>
             </FrameLayout>
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Цена"
-                android:id="@+id/price_button"
-                android:layout_gravity="center_horizontal"
-                android:onClick="onClick"
-                />
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Пробег"
-                android:id="@+id/probeg_button"
-                android:layout_gravity="center_horizontal"
-                android:onClick="onClick"
-                />
-
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="КПП"
-                android:id="@+id/trans_button"
-                android:layout_gravity="center_horizontal"
-                android:onClick="onClick"
-                />
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Тип кузова"
-                android:id="@+id/body_button"
-                android:layout_gravity="center_horizontal"
-                android:onClick="onClick"
-                />
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Тип двигателя"
-                android:id="@+id/engine_button"
-                android:layout_gravity="center_horizontal"
-                android:onClick="onClick"
-                />
-
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Объём двигателя"
-                android:id="@+id/engine_volume_button"
-                android:layout_gravity="center_horizontal"
-                android:onClick="onClick"
-                />
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Привод"
-                android:id="@+id/privod_button"
-                android:layout_gravity="center_horizontal"
-                android:onClick="onClick"
-                />
+            <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Цена"
+                    android:id="@+id/price_button"
+                    android:onClick="onClick"
+                    />
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableEnd="@drawable/krest"
+                    android:id="@+id/clear_price"
+                    android:layout_gravity="right"
+                    android:paddingRight="12dp"
+                    android:background="#00ffffff"
+                    android:onClick="clearClick"
+                    android:visibility="invisible"/>
+            </FrameLayout>
+            <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Пробег"
+                    android:id="@+id/probeg_button"
+                    android:layout_gravity="center_horizontal"
+                    android:onClick="onClick"
+                    />
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableEnd="@drawable/krest"
+                    android:id="@+id/clear_probeg"
+                    android:layout_gravity="right"
+                    android:paddingRight="12dp"
+                    android:background="#00ffffff"
+                    android:onClick="clearClick"
+                    android:visibility="invisible"/>
+            </FrameLayout>
+            <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="КПП"
+                    android:id="@+id/trans_button"
+                    android:layout_gravity="center_horizontal"
+                    android:onClick="onClick"
+                    />
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableEnd="@drawable/krest"
+                    android:id="@+id/clear_trans"
+                    android:layout_gravity="right"
+                    android:paddingRight="12dp"
+                    android:background="#00ffffff"
+                    android:onClick="clearClick"
+                    android:visibility="invisible"/>
+            </FrameLayout>
+            <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Тип кузова"
+                    android:id="@+id/body_button"
+                    android:layout_gravity="center_horizontal"
+                    android:onClick="onClick"
+                    />
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableEnd="@drawable/krest"
+                    android:id="@+id/clear_body"
+                    android:layout_gravity="right"
+                    android:paddingRight="12dp"
+                    android:background="#00ffffff"
+                    android:onClick="clearClick"
+                    android:visibility="invisible"/>
+            </FrameLayout>
+            <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Тип двигателя"
+                    android:id="@+id/engine_button"
+                    android:layout_gravity="center_horizontal"
+                    android:onClick="onClick"
+                    />
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableEnd="@drawable/krest"
+                    android:id="@+id/clear_engine"
+                    android:layout_gravity="right"
+                    android:paddingRight="12dp"
+                    android:background="#00ffffff"
+                    android:onClick="clearClick"
+                    android:visibility="invisible"/>
+            </FrameLayout>
+            <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Объём двигателя"
+                    android:id="@+id/engine_volume_button"
+                    android:layout_gravity="center_horizontal"
+                    android:onClick="onClick"
+                    />
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableEnd="@drawable/krest"
+                    android:id="@+id/clear_enginevolume"
+                    android:layout_gravity="right"
+                    android:paddingRight="12dp"
+                    android:background="#00ffffff"
+                    android:onClick="clearClick"
+                    android:visibility="invisible"/>
+            </FrameLayout>
+            <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Привод"
+                    android:id="@+id/privod_button"
+                    android:layout_gravity="center_horizontal"
+                    android:onClick="onClick"
+                    />
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableEnd="@drawable/krest"
+                    android:id="@+id/clear_privod"
+                    android:layout_gravity="right"
+                    android:paddingRight="12dp"
+                    android:background="#00ffffff"
+                    android:onClick="clearClick"
+                    android:visibility="invisible"/>
+            </FrameLayout>
             <CheckBox
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

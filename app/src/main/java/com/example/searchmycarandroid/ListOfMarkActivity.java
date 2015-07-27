@@ -51,10 +51,12 @@ public class ListOfMarkActivity extends Activity {
             public void onItemClick(AdapterView<?> av, View v, int pos, long id) {
                 SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
                 SharedPreferences.Editor ed = sPref.edit();
-                if(getIntent().hasExtra("Marks"))
-                    ed.putInt("SelectedMark",pos);
-                else
-                    ed.putInt("SelectedModel",pos);
+                if (getIntent().hasExtra("Marks")) {
+                    ed.putInt("SelectedMark", pos);
+                }
+                else{
+                    ed.putInt("SelectedModel", pos);
+                }
                 ed.commit();
                 finish();
             }
