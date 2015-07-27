@@ -77,9 +77,9 @@ public class MonitoringService extends Service {
             });
             t.start();
             while (t.isAlive());
-            if(Integer.parseInt(answer[0]) != 0) {
+            /*if(Integer.parseInt(answer[0]) != 0) {
                 sendNotification(answer[0]);
-            }
+            }*/
         }
     }
 
