@@ -24,17 +24,21 @@ import java.util.concurrent.TimeUnit;
 
 public class MonitoringService extends Service {
     NotificationManager nm;
-    String requestAvito, requestAuto, lastCarDate;
+    Boolean[] status = {false,false,false};
+    String lastCarDate;
 
     public class ServiceThread implements Runnable {
         public int serviceId;
-        public ServiceThread(int Id) {
+        public String requestAvito, requestAuto;
+        public ServiceThread(int Id, String requestAvito, String requestAuto) {
             this.serviceId=Id;
+            this.requestAuto = requestAuto;
+            this.requestAvito = requestAvito;
         }
         @TargetApi(Build.VERSION_CODES.HONEYCOMB)
         public void run() {
             try {
-                ServiceProcess(serviceId);
+                ServiceProcess(serviceId, requestAvito, requestAuto);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -46,21 +50,20 @@ public class MonitoringService extends Service {
         nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
     }
     public int onStartCommand(Intent intent, int flags, int startId) {
-
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-        requestAuto = sPref.getString("SearchMyCarServiceRequestAuto", "");
-        requestAvito = sPref.getString("SearchMyCarServiceRequestAvito", "");
-        Runnable st = new ServiceThread(intent.getIntExtra("SearchMyCarNumberOfService",-1));
-        Log.i("Service", String.valueOf(startId) + " " + intent.getIntExtra("SearchMyCarNumberOfService",-1));
-
-        new Thread(st).start();
-
+        String[] status = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE).getString("SearchMyCarService_status", "").split(";");
+        for(int i=1;i<=3;i++) {
+            if(status[i-1].equals("true")) {
+                String requestAuto = sPref.getString("SearchMyCarServiceRequestAuto" + i, "");
+                String requestAvito = sPref.getString("SearchMyCarServiceRequestAvito" + i, "");
+                Runnable st = new ServiceThread(i, requestAvito, requestAuto);
+                new Thread(st).start();
+            }
+        }
         return START_STICKY;
     }
 
     public void onDestroy() {
-        requestAuto=null;
-        requestAvito=null;
         super.onDestroy();
     }
     public IBinder onBind(Intent intent) {
@@ -68,10 +71,10 @@ public class MonitoringService extends Service {
     }
 
 
-    void ServiceProcess(int ID) throws InterruptedException {
+    void ServiceProcess(int serviceID, final String requestAvito, final String requestAuto) throws InterruptedException {
         for (int i = 1; i<=100; i++) {
             TimeUnit.SECONDS.sleep(60);
-            if(requestAuto == null && requestAvito == null)
+            if(status[serviceID-1] == false)
                 return;
             SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
             lastCarDate = sPref.getString("SearchMyCarServiceLastCarDate","");
@@ -128,7 +131,7 @@ public class MonitoringService extends Service {
             t.start();
             while (t.isAlive());
             if(counter[0] != 0) {
-                sendNotification(counter[0], ID);
+                sendNotification(counter[0], serviceID);
             }
         }
     }
@@ -139,12 +142,13 @@ public class MonitoringService extends Service {
                 System.currentTimeMillis());
 
         Intent intent = new Intent(this, NotificationActivity.class);
+        intent.putExtra("MonitorNumber", 1);
         PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
-        SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+        /*SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         SharedPreferences.Editor ed = sPref.edit();
         ed.putInt("SearchMyCarServiceOutput", serviceID);
-        ed.commit();
+        ed.commit();*/
 
         if(countOfNewCars == 1)
             notif.setLatestEventInfo(this, "SearchMyAuto", "Найден "+countOfNewCars+" новый авто", pIntent);

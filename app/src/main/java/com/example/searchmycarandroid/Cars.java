@@ -70,6 +70,7 @@ public class Cars {
         }
         else
             return false;
+        currentCar.timeOfCreate.setSeconds(0);
 
         currentCar.href = elem.select("td.sales-list-cell.sales-list-cell_images > a").first().attr("href");
         currentCar.img = elem.select("td.sales-list-cell.sales-list-cell_images > a > img").first().attr("data-original");
@@ -151,6 +152,10 @@ public class Cars {
             return cars[0].timeOfCreate.toString();
         else
             return null;
+    }
+    public String getCarDate(int i)
+    {
+        return cars[i].timeOfCreate.toString();
     }
     public String getMessage(int pos)
     {
@@ -313,6 +318,7 @@ public class Cars {
             currentCar.timeOfCreate.setHours(Integer.parseInt(date[2].split(":")[0]));
             currentCar.timeOfCreate.setDate(Integer.parseInt(date[0]));
         }
+        currentCar.timeOfCreate.setSeconds(0);
 
         if(!elem.select("div.description > div.data > p:nth-child(2)").text().isEmpty())
             currentCar.city = elem.select("div.description > div.data > p:nth-child(2)").text();

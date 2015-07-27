@@ -32,36 +32,28 @@
                 android:layout_gravity="center_horizontal"
                 android:onClick="onClick"
                 />
-            <LinearLayout
+            <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_gravity="center_horizontal"
-                android:weightSum="100"
                 >
                 <Button
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Год выпуска"
                     android:id="@+id/year_button"
-                    android:layout_weight="87"
                     android:onClick="onClick"
-                    android:layout_marginRight="-4dp"
                     />
                 <Button
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:drawableEnd="@drawable/krest"
                     android:id="@+id/year_button1"
-                    android:layout_weight="13"
-                    android:layout_marginLeft="-4dp"
-
-                    android:layout_marginRight="0dp"
-                    android:layout_gravity="center_vertical"
+                    android:layout_gravity="right"
+                    android:paddingRight="12dp"
 
 
-                    />
-            </LinearLayout>
+                    android:background="#00ffffff" />
+            </FrameLayout>
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

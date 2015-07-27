@@ -11,7 +11,7 @@
         android:indeterminateOnly="true"
         android:layout_width="118dp"
         android:layout_height="118dp"
-        android:id="@+id/progressBar"
+        android:id="@+id/progressBarMonitor"
         android:layout_gravity="center" />
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -24,10 +24,10 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:background="#ff0a4e74">
-            <Button android:id="@+id/buttonMonitor1"
+            <Button android:id="@+id/buttonStopMonitor"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:layout_weight="0.31"
-                android:text="Монитор 1"
+                android:text="Остановить мониторинг"
                 android:background="#ff2276a3"    android:onClick="onClickStart"
                 android:textSize="19dp"
                 android:textColor="#ffffffff"
@@ -36,37 +36,13 @@
                 android:paddingBottom="15dp"
                 android:layout_gravity="top"
                 android:layout_marginRight="1dp" />
-            <Button android:id="@+id/buttonMonitor2"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:text="Монитор 2"
-                android:background="#ff2276a3"    android:onClick="onClickStart"
-                android:textSize="19dp"
-                android:layout_weight="0.31"
-                android:textColor="#ffffffff"
-                android:elegantTextHeight="false"
-                android:paddingTop="15dp"
-                android:paddingBottom="15dp"
-                android:layout_gravity="top"
-                android:layout_marginRight="1dp"
-                android:layout_marginLeft="1dp" />
-            <Button android:id="@+id/buttonMonitor3"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:text="Монитор 3"
-                android:background="#ff2276a3"    android:onClick="onClickStart"
-                android:textSize="19dp"
-                android:layout_weight="0.31"
-                android:textColor="#ffffffff"
-                android:elegantTextHeight="false"
-                android:paddingTop="15dp"
-                android:paddingBottom="15dp"
-                android:layout_gravity="top"
-                android:layout_marginLeft="1dp" />
+
         </LinearLayout>
 
         <ListView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/listView"
+            android:id="@+id/listViewMonitor"
             android:layout_gravity="center_horizontal|" />
 
     </LinearLayout>

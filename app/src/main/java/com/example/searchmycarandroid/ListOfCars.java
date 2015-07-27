@@ -13,6 +13,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.BoringLayout;
 import android.text.Html;
 import android.util.Log;
 import android.view.View;
@@ -43,42 +44,108 @@ public class ListOfCars extends Activity {
     Toast toastErrorConnection, toastErrorCarList;
     AlertDialog.Builder ad;
     String requestAvito, requestAuto, lastCarDate;
+    LoadListView loader = new LoadListView();
+
+    @Override
+    protected void onDestroy() {
+        loader.cancel(true);
+        super.onDestroy();
+        finish();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.listofcars);
-        LoadListView loader = new LoadListView();
 
         toastErrorConnection = Toast.makeText(getApplicationContext(),
                 "Связь с сервером не установлена :(", Toast.LENGTH_SHORT);
         toastErrorCarList = Toast.makeText(getApplicationContext(),
                 "По вашему запросу ничего не найдено", Toast.LENGTH_SHORT);
 
+
+        ActivityManager am = (ActivityManager)this.getSystemService(ACTIVITY_SERVICE);
+        List<ActivityManager.RunningServiceInfo> rs = am.getRunningServices(1000);
+        Boolean serviceRunning = false;
+        for (int i=0; i<rs.size(); i++)
+        {
+            if(rs.get(i).service.getClassName().equals("com.example.searchmycarandroid.MonitoringService")) {
+                serviceRunning = true;
+                break;
+            }
+        }
+
+        SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+        String status = sPref.getString("SearchMyCarService_status", "");
+        String[] stat;
+        if(serviceRunning)
+            stat = status.split(";");
+        else{
+            stat = new String[]{"false","false","false"};
+            sPref.edit().putString("SearchMyCarService_status","false;false;false").commit();
+        }
+
+        Button b1 = (Button) findViewById(R.id.buttonMonitor1);
+        Button b2 = (Button) findViewById(R.id.buttonMonitor2);
+        Button b3 = (Button) findViewById(R.id.buttonMonitor3);
+        if (stat[0].equals("true"))
+            b1.setText(Html.fromHtml("Монитор 1<br><font color=green face=cursive>запущен</font>"));
+        else
+            b1.setText(Html.fromHtml("Монитор 1<br><font color=#2E2E2E face=cursive>выключен</font>"));
+        if (stat[1].equals("true"))
+            b2.setText(Html.fromHtml("Монитор 2<br><font color=green face=cursive>запущен</font>"));
+        else
+            b2.setText(Html.fromHtml("Монитор 2<br><font color=#2E2E2E face=cursive>выключен</font>"));
+        if (stat[2].equals("true"))
+            b3.setText(Html.fromHtml("Монитор 3<br><font color=green face=cursive>запущен</font>"));
+        else
+            b3.setText(Html.fromHtml("Монитор 3<br><font color=#2E2E2E face=cursive>выключен</font>"));
+
+        sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+        requestAuto = sPref.getString("SearchMyCarRequest", "");
+        requestAvito = sPref.getString("SearchMyCarRequestAvito", "");
+        loader.execute(requestAuto, requestAvito);
+    }
+
+    int buttonNumber=0;
+    public void onClickStart(View v) {
         ad = new AlertDialog.Builder(ListOfCars.this);
         ad.setTitle("Запустить мониторинг?");
-        ad.setMessage("Будут приходить уведомления о поступлении новых авто.\nМожно запустить только один мониторинг.");
-        ad.setPositiveButton("Запустить новый монитор", new DialogInterface.OnClickListener() {
+        ad.setMessage("Будут приходить уведомления о поступлении новых авто.");
+        ad.setPositiveButton("Запустить монитор", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int arg1) {
-
                 SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
                 SharedPreferences.Editor ed = sPref.edit();
-                //stopService(new Intent(ListOfCars.this, MonitoringService.class));
-                Intent serviceIntent = new Intent(ListOfCars.this, MonitoringService.class);
-                ed.putString("SearchMyCarServiceRequestAuto1", requestAuto);
-                ed.putString("SearchMyCarServiceRequestAvito1", requestAvito);
-                ed.putString("SearchMyCarServiceLastCarDate1", lastCarDate);
+                ed.putString("SearchMyCarServiceRequestAuto" + buttonNumber, requestAuto);
+                ed.putString("SearchMyCarServiceRequestAvito" + buttonNumber, requestAvito);
+                ed.putString("SearchMyCarServiceLastCarDate" + buttonNumber, lastCarDate);
+                String[] newStatus = sPref.getString("SearchMyCarService_status", "").split(";");
+                newStatus[buttonNumber - 1] = "true";
+                ed.putString("SearchMyCarService_status", newStatus[0] + ";" + newStatus[1] + ";" + newStatus[2]);
                 ed.commit();
-                serviceIntent.putExtra("SearchMyCarNumberOfService", 1);
-
+                Intent serviceIntent = new Intent(ListOfCars.this, MonitoringService.class);
+                serviceIntent.putExtra("SearchMyCarService_serviceID", buttonNumber);
+                serviceIntent.putExtra("SearchMyCarService_command", "start");
                 startService(serviceIntent);
-
-                Toast.makeText(ListOfCars.this, "Новый монитор запущен", Toast.LENGTH_SHORT).show();
+                switch (buttonNumber) {
+                    case 1:
+                        Button b1 = (Button) findViewById(R.id.buttonMonitor1);
+                        b1.setText(Html.fromHtml("Монитор 1<br><font color=green face=cursive>запущен</font>"));
+                        break;
+                    case 2:
+                        Button b2 = (Button) findViewById(R.id.buttonMonitor2);
+                        b2.setText(Html.fromHtml("Монитор 2<br><font color=green face=cursive>запущен</font>"));
+                        break;
+                    case 3:
+                        Button b3 = (Button) findViewById(R.id.buttonMonitor3);
+                        b3.setText(Html.fromHtml("Монитор 3<br><font color=green face=cursive>запущен</font>"));
+                        break;
+                }
             }
         });
-        ad.setNegativeButton("Остановить старый монитор", new DialogInterface.OnClickListener() {
+        ad.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int arg1) {
-                stopService(new Intent(ListOfCars.this, MonitoringService.class));
-                Toast.makeText(ListOfCars.this, "Монитор остановлен.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ListOfCars.this, "Вы не изменили параметры мониторинга", Toast.LENGTH_SHORT).show();
             }
         });
         ad.setCancelable(true);
@@ -88,21 +155,45 @@ public class ListOfCars extends Activity {
             }
         });
 
-        SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-        requestAuto = sPref.getString("SearchMyCarRequest", "");
-        requestAvito = sPref.getString("SearchMyCarRequestAvito", "");
-        loader.execute(requestAuto, requestAvito);
+        String[] status = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE).getString("SearchMyCarService_status", "").split(";");
 
-        Button b = (Button) findViewById(R.id.buttonSearch1);
-        b.setText(Html.fromHtml("Монитор 1<br><font color=green face=cursive>запущен</font>"));
-        b = (Button) findViewById(R.id.buttonSearch2);
-        b.setText(Html.fromHtml("Монитор 2<br><font color=#2E2E2E face=cursive>выключен</font>"));
-        b = (Button) findViewById(R.id.buttonSearch3);
-        b.setText(Html.fromHtml("Монитор 2<br><font color=#2E2E2E face=cursive>выключен</font>"));
-    }
 
-    public void onClickStart(View v) {
-        ad.show();
+        Intent intent = new Intent(ListOfCars.this, NotificationActivity.class);
+        switch (v.getId()) {
+            case R.id.buttonMonitor1:
+                if(status[0].equals("true"))
+                {
+                    intent.putExtra("MonitorNumber", 1);
+                    startActivity(intent);
+                }
+                else{
+                    buttonNumber = 1;
+                    ad.show();
+                }
+                break;
+            case R.id.buttonMonitor2:
+                if(status[1].equals("true"))
+                {
+                    intent.putExtra("MonitorNumber",2);
+                    startActivity(intent);
+                }
+                else{
+                    buttonNumber = 2;
+                    ad.show();
+                }
+                break;
+            case R.id.buttonMonitor3:
+                if(status[2].equals("true"))
+                {
+                    intent.putExtra("MonitorNumber",3);
+                    startActivity(intent);
+                }
+                else{
+                    buttonNumber = 3;
+                    ad.show();
+                }
+                break;
+        }
     }
 
     class LoadListView extends AsyncTask<String, Void, Cars> {
@@ -153,10 +244,7 @@ public class ListOfCars extends Activity {
 
                     carsAvto[0] = new Cars(listOfCars.size());
                     for(int i=0;i<listOfCars.size();i++)
-                    {
-                        if(!carsAvto[0].addFromAutoRu(listOfCars.get(i).select("table > tbody > tr").first()))
-                            Log.i("Service","now");
-                    }
+                        carsAvto[0].addFromAutoRu(listOfCars.get(i).select("table > tbody > tr").first());
                 }
             });
             Thread threadAvito = new Thread(new Runnable() {
@@ -240,8 +328,7 @@ public class ListOfCars extends Activity {
                     + carsAvito[0].getLenth() + " на Avito.ru, отсортировано по дате", Toast.LENGTH_LONG).show();
 
             ListView lv = (ListView) findViewById(R.id.listView);
-            lv.setAdapter(new ListViewAdapter(ListOfCars.this, result, images, 0));
-
+            lv.setAdapter(new ListViewAdapter(ListOfCars.this, result, images));
 
             imagesRef = new String[result.getLenth()];
             for (int i = 0; i < result.getLenth(); i++) {
