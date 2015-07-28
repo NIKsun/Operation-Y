@@ -99,7 +99,9 @@ public class Cars {
         if(matcher.find()){
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             try {
-                return format.parse(matcher.group(1));
+                Date buf = format.parse(matcher.group(1));
+                buf.setSeconds(0);
+                return buf;
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -144,6 +146,7 @@ public class Cars {
             result.setHours(Integer.parseInt(date[2].split(":")[0]));
             result.setDate(Integer.parseInt(date[0]));
         }
+        result.setSeconds(0);
         return result;
     }
     public String getLastCarDate()

@@ -251,9 +251,9 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 //put two request
                 String requestauto = "###";
                 String requestavito = "###";
-                if(!(marka.equals("###")) && !(model.equals("###")))
+                if(!(marka.equals("/###")) && !(model.equals("/###")))
                     requestauto = begin + marka + model + end + year1 + startYear.toString() + year2 + endYear.toString() + price1 + price2+photo+eng_vol1+volume_arr_avto[startVolume]+eng_vol2+volume_arr_avto[endVolume]+probeg;
-                if(!(markaavito.equals("###")) && !(modelavito.equals("###")))
+                if(!(markaavito.equals("/###")) && !(modelavito.equals("/###")))
                     requestavito = begin_avito+markaavito+modelavito+"/?"+photoa+price1a+startPrice+price2a+endPrice+"&f="+year1a+startYearAvito+year2a+endYearAvito+"."+eng_vol1a+volume_arr_avito[startVolume]+eng_vol2a+volume_arr_avito[endVolume]+"."+probega;
                 ed.putString("SearchMyCarRequest", requestauto);
                 ed.putString("SearchMyCarRequestAvito", requestavito);

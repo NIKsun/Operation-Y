@@ -21,6 +21,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.jsoup.HttpStatusException;
@@ -45,25 +46,29 @@ public class ListOfCars extends Activity {
     AlertDialog.Builder ad;
     String requestAvito, requestAuto, lastCarDate;
     LoadListView loader = new LoadListView();
+    LoadListView.LoadImage[] imageLoaders = null;
 
     @Override
     protected void onDestroy() {
         loader.cancel(true);
+        if(imageLoaders != null)
+            for(int i=0;i<imageLoaders.length;i++)
+                imageLoaders[i].cancel(true);
         super.onDestroy();
         finish();
     }
+    @Override
+    protected void onPause() {
+        if(imageLoaders != null)
+            for (int i = 0; i < imageLoaders.length; i++)
+                imageLoaders[i].cancel(false);
+
+        super.onPause();
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.listofcars);
-
-        toastErrorConnection = Toast.makeText(getApplicationContext(),
-                "Связь с сервером не установлена :(", Toast.LENGTH_SHORT);
-        toastErrorCarList = Toast.makeText(getApplicationContext(),
-                "По вашему запросу ничего не найдено", Toast.LENGTH_SHORT);
-
-
+    protected void onResume(){
+        super.onResume();
         ActivityManager am = (ActivityManager)this.getSystemService(ACTIVITY_SERVICE);
         List<ActivityManager.RunningServiceInfo> rs = am.getRunningServices(1000);
         Boolean serviceRunning = false;
@@ -100,15 +105,29 @@ public class ListOfCars extends Activity {
             b3.setText(Html.fromHtml("Монитор 3<br><font color=green face=cursive>запущен</font>"));
         else
             b3.setText(Html.fromHtml("Монитор 3<br><font color=#2E2E2E face=cursive>выключен</font>"));
+    }
 
-        sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.listofcars);
+
+        toastErrorConnection = Toast.makeText(getApplicationContext(),
+                "Связь с сервером не установлена :(", Toast.LENGTH_SHORT);
+        toastErrorCarList = Toast.makeText(getApplicationContext(),
+                "По вашему запросу ничего не найдено", Toast.LENGTH_SHORT);
+
+
+        SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         requestAuto = sPref.getString("SearchMyCarRequest", "");
         requestAvito = sPref.getString("SearchMyCarRequestAvito", "");
-        loader.execute(requestAuto, requestAvito);
+        lastCarDate = null;
+        loader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, requestAuto, requestAvito);
     }
 
     int buttonNumber=0;
     public void onClickStart(View v) {
+
         ad = new AlertDialog.Builder(ListOfCars.this);
         ad.setTitle("Запустить мониторинг?");
         ad.setMessage("Будут приходить уведомления о поступлении новых авто.");
@@ -119,6 +138,8 @@ public class ListOfCars extends Activity {
                 ed.putString("SearchMyCarServiceRequestAuto" + buttonNumber, requestAuto);
                 ed.putString("SearchMyCarServiceRequestAvito" + buttonNumber, requestAvito);
                 ed.putString("SearchMyCarServiceLastCarDate" + buttonNumber, lastCarDate);
+                ed.putInt("SearchMyCarService_period" + buttonNumber, 6);
+                Log.i("Bar23", String.valueOf(buttonNumber));
                 String[] newStatus = sPref.getString("SearchMyCarService_status", "").split(";");
                 newStatus[buttonNumber - 1] = "true";
                 ed.putString("SearchMyCarService_status", newStatus[0] + ";" + newStatus[1] + ";" + newStatus[2]);
@@ -141,6 +162,7 @@ public class ListOfCars extends Activity {
                         b3.setText(Html.fromHtml("Монитор 3<br><font color=green face=cursive>запущен</font>"));
                         break;
                 }
+                Toast.makeText(ListOfCars.this, "Монитор " + buttonNumber + " запущен с текущими параметрами", Toast.LENGTH_LONG).show();
             }
         });
         ad.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
@@ -161,42 +183,37 @@ public class ListOfCars extends Activity {
         Intent intent = new Intent(ListOfCars.this, NotificationActivity.class);
         switch (v.getId()) {
             case R.id.buttonMonitor1:
-                if(status[0].equals("true"))
-                {
+                if (status[0].equals("true")) {
                     intent.putExtra("MonitorNumber", 1);
                     startActivity(intent);
-                }
-                else{
+                    return;
+                } else
                     buttonNumber = 1;
-                    ad.show();
-                }
                 break;
             case R.id.buttonMonitor2:
-                if(status[1].equals("true"))
-                {
-                    intent.putExtra("MonitorNumber",2);
+                if (status[1].equals("true")) {
+                    intent.putExtra("MonitorNumber", 2);
                     startActivity(intent);
-                }
-                else{
+                    return;
+                } else
                     buttonNumber = 2;
-                    ad.show();
-                }
                 break;
             case R.id.buttonMonitor3:
-                if(status[2].equals("true"))
-                {
-                    intent.putExtra("MonitorNumber",3);
+                if (status[2].equals("true")) {
+                    intent.putExtra("MonitorNumber", 3);
                     startActivity(intent);
-                }
-                else{
+                    return;
+                } else
                     buttonNumber = 3;
-                    ad.show();
-                }
                 break;
         }
+        if(lastCarDate == null)
+            Toast.makeText(getApplicationContext(), "Подождите загрузки списка", Toast.LENGTH_SHORT).show();
+        else
+            ad.show();
     }
 
-    class LoadListView extends AsyncTask<String, Void, Cars> {
+    class LoadListView extends AsyncTask<String, String, Cars> {
         String[] imagesRef;
         Bitmap[] images;
         final Cars[] carsAvto = new Cars[1], carsAvito = new Cars[1];
@@ -206,47 +223,14 @@ public class ListOfCars extends Activity {
             super.onPreExecute();
             ProgressBar pb = (ProgressBar)findViewById(R.id.progressBar);
             pb.setVisibility(View.VISIBLE);
+            TextView tv = (TextView)findViewById(R.id.textViewProgressBar);
+            tv.setVisibility(View.VISIBLE);
         }
 
         @TargetApi(Build.VERSION_CODES.HONEYCOMB)
         @Override
         protected Cars doInBackground(final String... params) {
-
-            final Boolean[] bulAvto = {true}, bulAvito = {true}, connectionSuccess = {true};
-            Thread threadAvto = new Thread(new Runnable() {
-                @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-                public void run() {
-                    Document doc;
-                    try {
-                        doc  = Jsoup.connect(params[0]).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").get();
-                    }
-                    catch (IOException e)
-                    {
-                        connectionSuccess[0] = false;
-                        return;
-                    }
-                    Elements mainElems  =  doc.select("body > div.branding_fix > div.content.content_style > article > div.clearfix > div.b-page-wrapper > div.b-page-content").first().children();
-
-                    Elements listOfCars = null;
-                    for(int i=0;i<mainElems.size();i++)
-                    {
-                        String className = mainElems.get(i).className();
-                        if((className.indexOf("widget widget_theme_white sales-list") == 0) && (className.length() == 36)){
-                            listOfCars = mainElems.get(i).select("div.sales-list-item");
-                            break;
-                        }
-                    }
-                    if(listOfCars == null)
-                    {
-                        bulAvto[0] = false;
-                        return;
-                    }
-
-                    carsAvto[0] = new Cars(listOfCars.size());
-                    for(int i=0;i<listOfCars.size();i++)
-                        carsAvto[0].addFromAutoRu(listOfCars.get(i).select("table > tbody > tr").first());
-                }
-            });
+            final Boolean[] bulAvito = {true}, connectionAvitoSuccess = {true};
             Thread threadAvito = new Thread(new Runnable() {
                 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
                 public void run() {
@@ -256,12 +240,12 @@ public class ListOfCars extends Activity {
                     }
                     catch (HttpStatusException e)
                     {
-                        bulAvito[0]=false;
+                        bulAvito[0] =false;
                         return;
                     }
                     catch (IOException e)
                     {
-                        connectionSuccess[0] = false;
+                        connectionAvitoSuccess[0] = false;
                         return;
                     }
                     Elements mainElems = doc.select("#catalog > div.layout-internal.col-12.js-autosuggest__search-list-container > div.l-content.clearfix > div.clearfix > div.catalog.catalog_table > div.catalog-list.clearfix").first().children();
@@ -278,32 +262,64 @@ public class ListOfCars extends Activity {
 
                 }
             });
-            if(!params[0].equals("###"))
-                threadAvto.start();
-            else
-                bulAvto[0] = false;
             if(!params[1].equals("###"))
                 threadAvito.start();
             else
                 bulAvito[0] = false;
 
-            while (threadAvto.isAlive() || threadAvito.isAlive()); //waiting
 
-            if(!connectionSuccess[0]) {
+
+            publishProgress("Загрузка с Auto.ru");
+            Boolean bulAvto = true, connectionAutoSuccess = true;
+            if(!params[0].equals("###")) {
+                Document doc = null;
+                try {
+                    doc = Jsoup.connect(params[0]).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").get();
+                } catch (IOException e) {
+                    connectionAutoSuccess = false;
+                }
+                if(connectionAutoSuccess) {
+                    Elements mainElems = doc.select("body > div.branding_fix > div.content.content_style > article > div.clearfix > div.b-page-wrapper > div.b-page-content").first().children();
+
+                    Elements listOfCars = null;
+                    for (int i = 0; i < mainElems.size(); i++) {
+                        String className = mainElems.get(i).className();
+                        if ((className.indexOf("widget widget_theme_white sales-list") == 0) && (className.length() == 36)) {
+                            listOfCars = mainElems.get(i).select("div.sales-list-item");
+                            break;
+                        }
+                    }
+                    if (listOfCars == null) {
+                        bulAvto = false;
+                    }
+                    else {
+                        carsAvto[0] = new Cars(listOfCars.size());
+                        for (int i = 0; i < listOfCars.size(); i++)
+                            carsAvto[0].addFromAutoRu(listOfCars.get(i).select("table > tbody > tr").first());
+                    }
+                }
+            }
+            else
+                bulAvto = false;
+
+            if(!connectionAutoSuccess && !connectionAvitoSuccess[0]) {
                 toastErrorConnection.show();
                 return null;
             }
-            if(!bulAvito[0] && !bulAvto[0])
+            publishProgress("Загрузка с Avito.ru");
+            while (threadAvito.isAlive()); //waiting
+            publishProgress("Подготовка результата");
+            if(!bulAvito[0] && !bulAvto)
             {
                 toastErrorCarList.show();
                 return null;
             }
-            if(!bulAvito[0])
+            if(!bulAvito[0] || !connectionAvitoSuccess[0])
                 carsAvito[0] = new Cars(0);
-            if(!bulAvto[0])
+            if(!bulAvto || !connectionAutoSuccess)
                 carsAvto[0] = new Cars(0);
 
-            Cars cars = Cars.merge(carsAvto[0],carsAvito[0]);
+            Cars cars = Cars.merge(carsAvto[0], carsAvito[0]);
             Bitmap LoadingImage = BitmapFactory.decodeResource(getResources(), R.drawable.res);
             images = new Bitmap[cars.getLenth()];
             for(int i=0;i<cars.getLenth();i++)
@@ -314,10 +330,18 @@ public class ListOfCars extends Activity {
             return cars;
         }
         @Override
+        protected void onProgressUpdate(String... values) {
+            super.onProgressUpdate(values);
+            TextView tv = (TextView)findViewById(R.id.textViewProgressBar);
+            tv.setText(values[0]);
+        }
+        @Override
         protected void onPostExecute(Cars result) {
             super.onPostExecute(result);
             ProgressBar pb = (ProgressBar) findViewById(R.id.progressBar);
             pb.setVisibility(View.INVISIBLE);
+            TextView tv = (TextView)findViewById(R.id.textViewProgressBar);
+            tv.setVisibility(View.INVISIBLE);
 
             if(result == null) {
                 finish();
@@ -331,10 +355,11 @@ public class ListOfCars extends Activity {
             lv.setAdapter(new ListViewAdapter(ListOfCars.this, result, images));
 
             imagesRef = new String[result.getLenth()];
+            imageLoaders = new LoadImage[result.getLenth()];
             for (int i = 0; i < result.getLenth(); i++) {
                 imagesRef[i] = result.getImg(i);
-                LoadImage li = new LoadImage();
-                li.execute(i);
+                imageLoaders[i] = new LoadImage();
+                imageLoaders[i].execute(i);
             }
 
         }

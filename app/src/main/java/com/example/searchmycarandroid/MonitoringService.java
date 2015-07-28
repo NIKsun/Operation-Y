@@ -24,8 +24,6 @@ import java.util.concurrent.TimeUnit;
 
 public class MonitoringService extends Service {
     NotificationManager nm;
-    Boolean[] status = {false,false,false};
-    String lastCarDate;
 
     public class ServiceThread implements Runnable {
         public int serviceId;
@@ -73,12 +71,22 @@ public class MonitoringService extends Service {
 
     void ServiceProcess(int serviceID, final String requestAvito, final String requestAuto) throws InterruptedException {
         for (int i = 1; i<=100; i++) {
-            TimeUnit.SECONDS.sleep(60);
-            if(status[serviceID-1] == false)
-                return;
             SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-            lastCarDate = sPref.getString("SearchMyCarServiceLastCarDate","");
-            final long lastCarDateinMs = Date.parse(lastCarDate);
+            String status = sPref.getString("SearchMyCarService_status", "");
+            String[] stat;
+            if (status.equals(""))
+                return;
+            else
+                stat = status.split(";");
+            if(stat[serviceID-1].equals("false"))
+                return;
+
+            int period = sPref.getInt("SearchMyCarService_period"+serviceID,6)+4;
+            Log.i("Bar2", String.valueOf(period));
+            TimeUnit.SECONDS.sleep(60 * period);
+
+            String lastCarID = sPref.getString("SearchMyCarServiceLastCarDate" + serviceID, "");
+            final long lastCarDateinMs = Date.parse(lastCarID);
             final int[] counter = {0};
 
             Thread t = new Thread(new Runnable() {
@@ -108,7 +116,7 @@ public class MonitoringService extends Service {
                         Date buf;
                         for (int i = 0; i < listOfCars.size(); i++) {
                             buf = Cars.getDateAuto(listOfCars.get(i).select("table > tbody > tr").first());
-                            if(buf != null && lastCarDateinMs < buf.getTime())
+                            if(buf != null && lastCarDateinMs < Date.parse(buf.toString()))
                                 counter[0]++;
                         }
                     }
@@ -122,7 +130,7 @@ public class MonitoringService extends Service {
 
                         for (int i = 0; i < mainElems.size(); i++)
                             for (int j = 0; j < mainElems.get(i).children().size(); j++) {
-                                if(lastCarDateinMs < Cars.getDateAvito(mainElems.get(i).children().get(j)).getTime())
+                                if (lastCarDateinMs < Date.parse(Cars.getDateAvito(mainElems.get(i).children().get(j)).toString()))
                                     counter[0]++;
                             }
                     }
@@ -152,9 +160,9 @@ public class MonitoringService extends Service {
         ed.commit();*/
 
         if(countOfNewCars == 1)
-            notif.setLatestEventInfo(this, "SearchMyAuto", "Найден "+countOfNewCars+" новый авто", pIntent);
+            notif.setLatestEventInfo(this, "Монитор "+serviceID, "Найден "+countOfNewCars+" новый авто", pIntent);
         else
-            notif.setLatestEventInfo(this, "SearchMyAuto", "Найдено "+countOfNewCars+" новых авто", pIntent);
+            notif.setLatestEventInfo(this, "Монитор "+serviceID, "Найдено "+countOfNewCars+" новых авто", pIntent);
         Uri ringURI = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         notif.number = countOfNewCars;
         notif.sound = ringURI;
