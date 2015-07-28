@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Автоматическая"
+        android:id="@+id/checkBoxtrans1"
+        android:layout_gravity="left"
+        android:textSize="20dp"
+/>
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Механика"
+        android:id="@+id/checkBoxtrans2"
+        android:layout_gravity="left"
+        android:textSize="20dp"
+/>
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Робот"
+        android:id="@+id/checkBoxtrans3"
+        android:layout_gravity="left"
+        android:textSize="20dp"
+/>
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Вариатор"
+        android:id="@+id/checkBoxtrans4"
+        android:layout_gravity="left"
+        android:textSize="20dp"
+/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/transCheckBox"
+        android:text="Применить"
+        />
+</LinearLayout>

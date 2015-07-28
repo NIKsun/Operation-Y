@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<LinearLayout
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout android:orientation="vertical" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_weight="1">
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cедан"
+            android:id="@+id/checkBoxbody1"
+            android:layout_gravity="left"
+            android:textSize="20dp"
+            android:layout_weight="1"
+            />
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Хэтчбек"
+            android:id="@+id/checkBoxbody2"
+            android:layout_gravity="left"
+            android:textSize="20dp"
+            />
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Универсал"
+            android:id="@+id/checkBoxbody3"
+            android:layout_gravity="left"
+            android:textSize="20dp"
+            android:layout_weight="1"
+            />
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Минивэн"
+            android:id="@+id/checkBoxbody5"
+            android:layout_gravity="left"
+            android:textSize="20dp"
+            android:layout_weight="1"
+            />
+
+
+
+
+
+    </LinearLayout>
+    <LinearLayout android:orientation="vertical" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_weight="1">
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Купе"
+            android:id="@+id/checkBoxbody7"
+            android:layout_gravity="left"
+            android:textSize="20dp"
+            android:layout_weight="1"
+            />
+
+
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Фургон"
+            android:id="@+id/checkBoxbody9"
+            android:layout_gravity="left"
+            android:textSize="20dp"
+            android:layout_weight="1"
+            />
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Лимузин"
+            android:id="@+id/checkBoxbody6"
+            android:layout_gravity="left"
+            android:textSize="20dp"
+            android:layout_weight="1"
+            />
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Пикап"
+            android:id="@+id/checkBoxbody10"
+            android:layout_gravity="left"
+            android:textSize="20dp"
+            android:layout_weight="1"
+            />
+
+    </LinearLayout>
+
+</LinearLayout>
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+    <CheckBox
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Внедорожник"
+    android:id="@+id/checkBoxbody4"
+    android:layout_gravity="left"
+    android:textSize="20dp"
+    android:layout_weight="1"
+        />
+    <CheckBox
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Кабриолет"
+    android:id="@+id/checkBoxbody8"
+    android:layout_gravity="left"
+    android:textSize="20dp"
+
+    />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/bodyCheckBox"
+        android:text="Применить"
+        />
+</LinearLayout>
+
+</LinearLayout>
