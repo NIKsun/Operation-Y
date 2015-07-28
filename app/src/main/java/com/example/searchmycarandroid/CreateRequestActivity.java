@@ -1,7 +1,6 @@
 package com.example.searchmycarandroid;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.Context;
@@ -11,7 +10,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -22,11 +20,9 @@ import android.widget.CheckBox;
 import android.widget.NumberPicker;
 import android.widget.Toast;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 
 public class CreateRequestActivity extends Activity implements OnClickListener {
@@ -71,8 +67,6 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
 
 //nen
                     Integer posModel = sPref.getInt("SelectedModel", 0);
-
-
                     if(posModel==0){
                         b1.setText("Модель");
                         Button b5 = (Button) findViewById(R.id.clear_model);
@@ -251,9 +245,11 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 //put two request
                 String requestauto = "###";
                 String requestavito = "###";
+
                 if(!(marka.equals("/###")) && !(model.equals("/###")))
                     requestauto = begin + marka + model + end + year1 + startYear.toString() + year2 + endYear.toString() + price1 + price2+photo+eng_vol1+volume_arr_avto[startVolume]+eng_vol2+volume_arr_avto[endVolume]+probeg;
                 if(!(markaavito.equals("/###")) && !(modelavito.equals("/###")))
+
                     requestavito = begin_avito+markaavito+modelavito+"/?"+photoa+price1a+startPrice+price2a+endPrice+"&f="+year1a+startYearAvito+year2a+endYearAvito+"."+eng_vol1a+volume_arr_avito[startVolume]+eng_vol2a+volume_arr_avito[endVolume]+"."+probega;
                 ed.putString("SearchMyCarRequest", requestauto);
                 ed.putString("SearchMyCarRequestAvito", requestavito);
@@ -321,6 +317,18 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 break;
             case R.id.probeg_button:
                 showPickerProbeg();
+                break;
+            case R.id.trans_button:
+                showMultiChecker(1);
+                break;
+            case R.id.engine_button:
+                showMultiChecker(2);
+                break;
+            case R.id.privod_button:
+                showMultiChecker(3);
+                break;
+            case R.id.body_button:
+                showMultiChecker(4);
                 break;
             default:
                 break;
@@ -623,8 +631,7 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
         np1.setValue(oldProbeg + 1);
 
         Button ok = (Button) dialogPicker.findViewById(R.id.onebuttonPicker);
-        ok.setOnClickListener(new OnClickListener()
-        {
+        ok.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -643,7 +650,34 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
         });
         dialogPicker.show();
     }
+    public void showMultiChecker(int n){
+        final Dialog dialogPicker = new Dialog(CreateRequestActivity.this);
+        switch (n){
+            case 1:
+                dialogPicker.setTitle("Коробка передач");
+                dialogPicker.setContentView(R.layout.trans_checkbox);
+                dialogPicker.show();
+                break;
+            case 2:
+                dialogPicker.setTitle("Тип двигателя");
+                dialogPicker.setContentView(R.layout.engine_type_checkbox);
+                dialogPicker.show();
+                break;
+            case 3:
+                dialogPicker.setTitle("Привод");
+                dialogPicker.setContentView(R.layout.privod_checkbox);
+                dialogPicker.show();
+                break;
+            case 4:
+                dialogPicker.setTitle("Тип кузова");
+                dialogPicker.setContentView(R.layout.body_checkbox);
+                dialogPicker.show();
+                break;
+            default:
+                break;
+        }
 
+    }
     public void clearClick(View v) {
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         Button b2;

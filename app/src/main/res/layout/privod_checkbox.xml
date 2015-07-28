@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Передний"
+        android:id="@+id/checkBoxprivod1"
+        android:layout_gravity="left"
+        android:textSize="20dp"
+/>
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Задний"
+        android:id="@+id/checkBoxprivod2"
+        android:layout_gravity="left"
+        android:textSize="20dp"
+/>
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Полный"
+        android:id="@+id/checkBoxprivod3"
+        android:layout_gravity="left"
+        android:textSize="20dp"
+/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/privodCheckBox"
+        android:text="Применить"
+        />
+</LinearLayout>

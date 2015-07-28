@@ -253,7 +253,7 @@
     </ScrollView>
 
 
-    <LinearLayout android:id="@+id/fullscreen_content_controls" style="?metaButtonBarStyle"
+    <FrameLayout android:id="@+id/fullscreen_content_controls" style="?metaButtonBarStyle"
         android:layout_width="match_parent" android:layout_height="fill_parent"
         android:layout_gravity="bottom|center_horizontal"
         android:background="@color/black_overlay"
@@ -261,11 +261,20 @@
         android:layout_weight="91">
 
 
-        <Button android:id="@+id/buttonSearch" style="?metaButtonBarButtonStyle"
-            android:layout_width="0dp" android:layout_height="wrap_content"
-            android:layout_weight="1" android:text="@string/dummy_button" android:onClick="onClick" />
 
-    </LinearLayout>
+            <Button android:id="@+id/buttonSearch" style="?metaButtonBarButtonStyle"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                 android:text="@string/dummy_button" android:onClick="onClick" />
+
+            <Button android:id="@+id/buttonMon" style="?metaButtonBarButtonStyle"
+                android:layout_width="45dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="right"
+                android:drawableStart="@drawable/abc"/>
+
+
+
+    </FrameLayout>
 
 
 </LinearLayout>
