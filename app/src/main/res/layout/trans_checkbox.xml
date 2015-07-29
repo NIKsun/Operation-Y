@@ -6,7 +6,7 @@
     <CheckBox
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Автоматическая"
+        android:text="Автомат"
         android:id="@+id/checkBoxtrans1"
         android:layout_gravity="left"
         android:textSize="20dp"
