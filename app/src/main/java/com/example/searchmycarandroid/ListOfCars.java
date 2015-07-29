@@ -13,6 +13,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.BoringLayout;
 import android.text.Html;
 import android.util.Log;
@@ -45,25 +46,21 @@ public class ListOfCars extends Activity {
     Toast toastErrorConnection, toastErrorCarList;
     AlertDialog.Builder ad;
     String requestAvito, requestAuto, lastCarDateAvito, lastCarDateAuto;
-    Boolean isListDownloading;
+    Boolean isListDownloading, imageLoaderMayRunning;
     LoadListView loader = new LoadListView();
-    LoadListView.LoadImage[] imageLoaders = null;
+    Thread imageLoader = null;
+
 
     @Override
     protected void onDestroy() {
         loader.cancel(true);
-        if(imageLoaders != null)
-            for(int i=0;i<imageLoaders.length;i++)
-                imageLoaders[i].cancel(true);
+        imageLoaderMayRunning = false;
         super.onDestroy();
         finish();
     }
     @Override
     protected void onPause() {
-        if(imageLoaders != null)
-            for (int i = 0; i < imageLoaders.length; i++)
-                imageLoaders[i].cancel(false);
-
+        imageLoaderMayRunning = false;
         super.onPause();
     }
 
@@ -346,7 +343,7 @@ public class ListOfCars extends Activity {
             tv.setText(values[0]);
         }
         @Override
-        protected void onPostExecute(Cars result) {
+        protected void onPostExecute(final Cars result) {
             super.onPostExecute(result);
             ProgressBar pb = (ProgressBar) findViewById(R.id.progressBar);
             pb.setVisibility(View.INVISIBLE);
@@ -365,40 +362,34 @@ public class ListOfCars extends Activity {
             ListView lv = (ListView) findViewById(R.id.listView);
             lv.setAdapter(new ListViewAdapter(ListOfCars.this, result, images));
 
-            imagesRef = new String[result.getLenth()];
-            imageLoaders = new LoadImage[result.getLenth()];
-            for (int i = 0; i < result.getLenth(); i++) {
-                imagesRef[i] = result.getImg(i);
-                imageLoaders[i] = new LoadImage();
-                imageLoaders[i].execute(i);
-            }
-
+            imageLoaderMayRunning = true;
+            startThread(result);
         }
+        private void startThread(final Cars result) {
+            final Handler handler = new Handler();
+            Runnable runnable = new Runnable() {
+                public void run() {
+                    for (int i = 0; i < result.getLenth(); i++) {
+                        try {
+                            if(imageLoaderMayRunning)
+                                images[i] = BitmapFactory.decodeStream((InputStream) new URL(result.getImg(i)).getContent());
+                            else
+                                return;
 
-        class LoadImage extends AsyncTask<Integer, Void, Integer> {
-            Bitmap bm;
-
-            @Override
-            protected void onPreExecute() {
-            }
-
-            @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-            @Override
-            protected Integer doInBackground(Integer... params) {
-                try {
-                    bm = BitmapFactory.decodeStream((InputStream) new URL(imagesRef[params[0]]).getContent());
-                } catch (IOException e) {
-                    e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        handler.post(new Runnable() {
+                            public void run() {
+                                ListView lv = (ListView) findViewById(R.id.listView);
+                                lv.invalidateViews();
+                            }
+                        });
+                    }
                 }
-                return params[0];
-            }
-            @Override
-            protected void onPostExecute(Integer result) {
-                images[result] = bm;
-                ListView lv=(ListView)findViewById(R.id.listView);
-                lv.invalidateViews();
-            }
-
+            };
+            imageLoader = new Thread(runnable);
+            imageLoader.start();
         }
     }
 }

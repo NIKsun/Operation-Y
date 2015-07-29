@@ -13,6 +13,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.BoringLayout;
 import android.text.Html;
 import android.util.Log;
@@ -46,15 +47,14 @@ public class NotificationActivity extends Activity {
     Toast toastErrorConnection, toastErrorCarList;
     String lastCarDateAvito, lastCarDateAuto;
     int monitorNumber;
-    LoadListViewMonitor.LoadImageMonitor[] imageLoaders = null;
     LoadListViewMonitor loader = new LoadListViewMonitor();
+    Boolean imageLoaderMayRunning;
+    Thread imageLoader = null;
 
     @Override
     protected void onNewIntent(Intent intent) {
         loader.cancel(true);
-        if(imageLoaders != null)
-            for(int i=0;i<imageLoaders.length;i++)
-                imageLoaders[i].cancel(true);
+        imageLoaderMayRunning = false;
         super.onDestroy();
         monitorNumber = intent.getIntExtra("NotificationMessage", 0);
         Log.i("111111111111111111111111", String.valueOf(monitorNumber));
@@ -97,17 +97,13 @@ public class NotificationActivity extends Activity {
     @Override
     protected void onDestroy() {
         loader.cancel(true);
-        if(imageLoaders != null)
-            for(int i=0;i<imageLoaders.length;i++)
-                imageLoaders[i].cancel(true);
+        imageLoaderMayRunning = false;
         super.onDestroy();
         finish();
     }
     @Override
     protected void onPause() {
-        if(imageLoaders != null)
-            for(int i=0;i<imageLoaders.length;i++)
-                imageLoaders[i].cancel(true);
+        imageLoaderMayRunning = false;
         super.onPause();
     }
 
@@ -331,39 +327,35 @@ public class NotificationActivity extends Activity {
             ListView lv = (ListView) findViewById(R.id.listViewMonitor);
             lv.setAdapter(new ListViewAdapter(NotificationActivity.this, result, images, lastCarDateAuto, lastCarDateAvito));
 
-            imagesRef = new String[result.getLenth()];
-            imageLoaders = new LoadImageMonitor[result.getLenth()];
-            for (int i = 0; i < result.getLenth(); i++) {
-                imagesRef[i] = result.getImg(i);
-                imageLoaders[i] = new LoadImageMonitor();
-                imageLoaders[i].execute(i);
-            }
+            imageLoaderMayRunning = true;
+            startThread(result);
         }
 
-        class LoadImageMonitor extends AsyncTask<Integer, Void, Integer> {
-            Bitmap bm;
+        private void startThread(final Cars result) {
+            final Handler handler = new Handler();
+            Runnable runnable = new Runnable() {
+                public void run() {
+                    for (int i = 0; i < result.getLenth(); i++) {
+                        try {
+                            if(imageLoaderMayRunning)
+                                images[i] = BitmapFactory.decodeStream((InputStream) new URL(result.getImg(i)).getContent());
+                            else
+                                return;
 
-            @Override
-            protected void onPreExecute() {
-            }
-
-            @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-            @Override
-            protected Integer doInBackground(Integer... params) {
-                try {
-                    bm = BitmapFactory.decodeStream((InputStream) new URL(imagesRef[params[0]]).getContent());
-                } catch (IOException e) {
-                    e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        handler.post(new Runnable() {
+                            public void run() {
+                                ListView lv = (ListView) findViewById(R.id.listViewMonitor);
+                                lv.invalidateViews();
+                            }
+                        });
+                    }
                 }
-                return params[0];
-            }
-            @Override
-            protected void onPostExecute(Integer result) {
-                images[result] = bm;
-                ListView lv=(ListView)findViewById(R.id.listViewMonitor);
-                lv.invalidateViews();
-            }
-
+            };
+            imageLoader = new Thread(runnable);
+            imageLoader.start();
         }
     }
 }
