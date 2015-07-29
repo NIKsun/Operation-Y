@@ -70,8 +70,14 @@ public class MonitoringService extends Service {
 
 
     void ServiceProcess(int serviceID, final String requestAvito, final String requestAuto) throws InterruptedException {
-        for (int i = 1; i<=100; i++) {
+        while (true) {
+
             SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+
+            //int period = sPref.getInt("SearchMyCarService_period"+serviceID,6)+4;
+            //TimeUnit.SECONDS.sleep(60 * period);
+            TimeUnit.SECONDS.sleep(30);
+            sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
             String status = sPref.getString("SearchMyCarService_status", "");
             String[] stat;
             if (status.equals(""))
@@ -80,13 +86,8 @@ public class MonitoringService extends Service {
                 stat = status.split(";");
             if(stat[serviceID-1].equals("false"))
                 return;
-
-            int period = sPref.getInt("SearchMyCarService_period"+serviceID,6)+4;
-            Log.i("Bar2", String.valueOf(period));
-            TimeUnit.SECONDS.sleep(60 * period);
-
-            String lastCarID = sPref.getString("SearchMyCarServiceLastCarDate" + serviceID, "");
-            final long lastCarDateinMs = Date.parse(lastCarID);
+            final String lastCarDateAuto = sPref.getString("SearchMyCarService_LastCarDateAuto" + serviceID, "###");
+            final String lastCarDateAvito = sPref.getString("SearchMyCarService_LastCarDateAvito" + serviceID, "###");
             final int[] counter = {0};
 
             Thread t = new Thread(new Runnable() {
@@ -114,31 +115,51 @@ public class MonitoringService extends Service {
                             return;
                         }
                         Date buf;
-                        for (int i = 0; i < listOfCars.size(); i++) {
-                            buf = Cars.getDateAuto(listOfCars.get(i).select("table > tbody > tr").first());
-                            if(buf != null && lastCarDateinMs < Date.parse(buf.toString()))
-                                counter[0]++;
+                        if(lastCarDateAuto.equals("###")) {
+                            for (int i = 0; i < listOfCars.size(); i++) {
+                                buf = Cars.getDateAuto(listOfCars.get(i).select("table > tbody > tr").first());
+                                if(buf != null)
+                                    counter[0]++;
+                            }
+                        }
+                        else {
+                            for (int i = 0; i < listOfCars.size(); i++) {
+                                buf = Cars.getDateAuto(listOfCars.get(i).select("table > tbody > tr").first());
+                                if (buf != null && Date.parse(lastCarDateAuto) < Date.parse(buf.toString()))
+                                    counter[0]++;
+                            }
                         }
                     }
+                    Log.i("Monitor1", String.valueOf(counter[0]));
                     if(!requestAvito.equals("###")) {
                         try {
                             doc = Jsoup.connect(requestAvito).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").get();
                         } catch (Exception e) {
+                            Log.i("Monitor", "error3");
                             return;
                         }
                         mainElems = doc.select("#catalog > div.layout-internal.col-12.js-autosuggest__search-list-container > div.l-content.clearfix > div.clearfix > div.catalog.catalog_table > div.catalog-list.clearfix").first().children();
 
-                        for (int i = 0; i < mainElems.size(); i++)
-                            for (int j = 0; j < mainElems.get(i).children().size(); j++) {
-                                if (lastCarDateinMs < Date.parse(Cars.getDateAvito(mainElems.get(i).children().get(j)).toString()))
+                        if(lastCarDateAvito.equals("###")){
+                            for (int i = 0; i < mainElems.size(); i++)
+                                for (int j = 0; j < mainElems.get(i).children().size(); j++)
                                     counter[0]++;
-                            }
+                        }
+                        else {
+                            for (int i = 0; i < mainElems.size(); i++)
+                                for (int j = 0; j < mainElems.get(i).children().size(); j++) {
+                                    if (Date.parse(lastCarDateAvito) < Date.parse(Cars.getDateAvito(mainElems.get(i).children().get(j)).toString()))
+                                        counter[0]++;
+                                }
+                        }
+                        Log.i("Monitor2", String.valueOf(counter[0]));
                     }
                 }
             });
             t.start();
             while (t.isAlive());
             if(counter[0] != 0) {
+                Log.i("Monitor3", String.valueOf(counter[0]));
                 sendNotification(counter[0], serviceID);
             }
 
@@ -147,12 +168,15 @@ public class MonitoringService extends Service {
 
     void sendNotification(int countOfNewCars, int serviceID) {
 
+
+        Log.i("MonitorNotif", String.valueOf(serviceID));
         Notification notif = new Notification(R.drawable.status_bar, "Новое авто!",
                 System.currentTimeMillis());
 
         Intent intent = new Intent(this, NotificationActivity.class);
-        intent.putExtra("MonitorNumber", 1);
-        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        intent.putExtra("NotificationMessage", serviceID);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         /*SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         SharedPreferences.Editor ed = sPref.edit();

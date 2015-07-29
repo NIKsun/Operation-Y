@@ -44,11 +44,56 @@ import java.util.List;
 
 public class NotificationActivity extends Activity {
     Toast toastErrorConnection, toastErrorCarList;
-    String lastCarDate;
+    String lastCarDateAvito, lastCarDateAuto;
     int monitorNumber;
     LoadListViewMonitor.LoadImageMonitor[] imageLoaders = null;
     LoadListViewMonitor loader = new LoadListViewMonitor();
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        loader.cancel(true);
+        if(imageLoaders != null)
+            for(int i=0;i<imageLoaders.length;i++)
+                imageLoaders[i].cancel(true);
+        super.onDestroy();
+        monitorNumber = intent.getIntExtra("NotificationMessage", 0);
+        Log.i("111111111111111111111111", String.valueOf(monitorNumber));
+        SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+        String requestAuto = sPref.getString("SearchMyCarServiceRequestAuto" + monitorNumber, "");
+        String requestAvito = sPref.getString("SearchMyCarServiceRequestAvito" + monitorNumber, "");
+        lastCarDateAuto = sPref.getString("SearchMyCarService_LastCarDateAuto" + monitorNumber, "###");
+        lastCarDateAvito = sPref.getString("SearchMyCarService_LastCarDateAvito" + monitorNumber, "###");
+        loader = new LoadListViewMonitor();
+        loader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, requestAuto, requestAvito);
+        final TextView textView = (TextView) findViewById(R.id.textViewSeekBar );
+        SeekBar seekBar = (SeekBar) findViewById(R.id.seekbar);
+
+        seekBar.setProgress(sPref.getInt("SearchMyCarService_period" + monitorNumber, 0));
+        textView.setText("Период\n" + String.valueOf(seekBar.getProgress() + 4) + " мин.");
+
+        seekBar.setOnSeekBarChangeListener(
+                new SeekBar.OnSeekBarChangeListener() {
+                    int progress = 0;
+
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progresValue, boolean fromUser) {
+                        textView.setText("Период\n" + String.valueOf(progresValue + 4) + " мин.");
+                        progress = progresValue;
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                        SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+                        sPref.edit().putInt("SearchMyCarService_period" + monitorNumber, progress).commit();
+                        Toast.makeText(getApplicationContext(), "Новый период установлен", Toast.LENGTH_SHORT).show();
+                    }
+                });
+        super.onNewIntent(intent);
+    }
     @Override
     protected void onDestroy() {
         loader.cancel(true);
@@ -77,12 +122,14 @@ public class NotificationActivity extends Activity {
         toastErrorCarList = Toast.makeText(getApplicationContext(),
                 "По вашему запросу ничего не найдено", Toast.LENGTH_SHORT);
 
-        monitorNumber = getIntent().getIntExtra("MonitorNumber", 0);
+        monitorNumber = getIntent().getIntExtra("NotificationMessage", 0);
 
+        Log.i("111111111111111111111111", String.valueOf(monitorNumber));
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         String requestAuto = sPref.getString("SearchMyCarServiceRequestAuto" + monitorNumber, "");
         String requestAvito = sPref.getString("SearchMyCarServiceRequestAvito" + monitorNumber, "");
-        lastCarDate = sPref.getString("SearchMyCarServiceLastCarDate" + monitorNumber, "");
+        lastCarDateAuto = sPref.getString("SearchMyCarService_LastCarDateAuto" + monitorNumber, "###");
+        lastCarDateAvito = sPref.getString("SearchMyCarService_LastCarDateAvito" + monitorNumber, "###");
         loader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, requestAuto, requestAvito);
 
         final TextView textView = (TextView) findViewById(R.id.textViewSeekBar );
@@ -119,7 +166,7 @@ public class NotificationActivity extends Activity {
     public void onClickStart(View v) {
         AlertDialog.Builder ad;
         ad = new AlertDialog.Builder(NotificationActivity.this);
-        ad.setTitle("Отсановить монитор "+monitorNumber+"?");
+        ad.setTitle("Остановить монитор " + monitorNumber+"?");
         ad.setMessage("Поисх авто по данным характеристикам прекратиться.");
         ad.setPositiveButton("Да", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int arg1) {
@@ -127,7 +174,7 @@ public class NotificationActivity extends Activity {
                 String[] newStatus = sPref.getString("SearchMyCarService_status", "").split(";");
                 newStatus[monitorNumber - 1] = "false";
                 sPref.edit().putString("SearchMyCarService_status", newStatus[0] + ";" + newStatus[1] + ";" + newStatus[2]).commit();
-                Toast.makeText(NotificationActivity.this, "Монитор " + monitorNumber + " запущен с текущими параметрами", Toast.LENGTH_LONG).show();
+                Toast.makeText(NotificationActivity.this, "Монитор " + monitorNumber + " остановлен", Toast.LENGTH_LONG).show();
                 finish();
             }
         });
@@ -242,10 +289,17 @@ public class NotificationActivity extends Activity {
                 toastErrorCarList.show();
                 return null;
             }
+            SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+            SharedPreferences.Editor ed = sPref.edit();
             if(!bulAvito[0] || !connectionAvitoSuccess[0])
                 carsAvito[0] = new Cars(0);
+            else
+                ed.putString("SearchMyCarService_LastCarDateAvito" + monitorNumber, carsAvito[0].getCarDateString(0));;
             if(!bulAvto || !connectionAutoSuccess)
                 carsAvto[0] = new Cars(0);
+            else
+                ed.putString("SearchMyCarService_LastCarDateAuto" + monitorNumber, carsAvto[0].getCarDateString(0));
+            ed.commit();
 
             Cars cars = Cars.merge(carsAvto[0], carsAvito[0]);
             Bitmap LoadingImage = BitmapFactory.decodeResource(getResources(), R.drawable.res);
@@ -253,8 +307,6 @@ public class NotificationActivity extends Activity {
             for(int i=0;i<cars.getLenth();i++)
                 images[i] = LoadingImage;
 
-            SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-            sPref.edit().putString("SearchMyCarServiceLastCarDate" + monitorNumber, cars.getLastCarDate()).commit();
             return cars;
         }
         @Override
@@ -277,7 +329,7 @@ public class NotificationActivity extends Activity {
             }
 
             ListView lv = (ListView) findViewById(R.id.listViewMonitor);
-            lv.setAdapter(new ListViewAdapter(NotificationActivity.this, result, images, lastCarDate));
+            lv.setAdapter(new ListViewAdapter(NotificationActivity.this, result, images, lastCarDateAuto, lastCarDateAvito));
 
             imagesRef = new String[result.getLenth()];
             imageLoaders = new LoadImageMonitor[result.getLenth()];

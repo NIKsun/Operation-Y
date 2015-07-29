@@ -35,6 +35,7 @@ public class Cars {
         String year;
         String city;
         Date timeOfCreate;
+        Boolean isFromAuto;
         boolean sorted;
     }
 
@@ -54,6 +55,7 @@ public class Cars {
         if(lastCar >= capacity)
             return false;
         Car currentCar = new Car();
+        currentCar.isFromAuto = true;
         if(elem == null){
             return false;
         }
@@ -149,16 +151,13 @@ public class Cars {
         result.setSeconds(0);
         return result;
     }
-    public String getLastCarDate()
-    {
-        if(lastCar !=0)
-            return cars[0].timeOfCreate.toString();
-        else
-            return null;
-    }
-    public String getCarDate(int i)
+    public String getCarDateString(int i)
     {
         return cars[i].timeOfCreate.toString();
+    }
+    public Date getCarDate(int i)
+    {
+        return cars[i].timeOfCreate;
     }
     public String getMessage(int pos)
     {
@@ -207,9 +206,6 @@ public class Cars {
 
     public static Cars merge(Cars carsAvto, Cars carsAvito)
     {
-        /*Log.i("Tag", String.valueOf(carsAvto.getLenth()));
-        for(int n=0;n<carsAvto.getLenth();n++)
-            Log.i("Tag", String.valueOf(carsAvto.cars[n].timeOfCreate));*/
         Cars result = new Cars(carsAvto.getLenth() + carsAvito.getLenth());
         int counter1 = carsAvto.getLenth(), counter2 = carsAvito.getLenth(),i=0;
         while ((counter1 != 0) && (counter2 != 0))
@@ -240,10 +236,16 @@ public class Cars {
         return result;
     }
 
+    public boolean carFromAuto(int position)
+    {
+        return cars[position].isFromAuto;
+    }
+
     @TargetApi(Build.VERSION_CODES.GINGERBREAD)
     public boolean addFromAvito(Element elem)
     {
         Car currentCar = new Car();
+        currentCar.isFromAuto = false;
         if(elem == null){
             return false;
         }

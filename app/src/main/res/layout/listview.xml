@@ -5,13 +5,28 @@
     android:orientation="horizontal"
     android:showDividers="beginning|end">
 
-    <ImageView
-        android:id="@+id/imageView1"
-        android:layout_gravity="center"
-        android:layout_width="135dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="2dp"
-        android:layout_marginBottom="2dp" />
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:orientation="vertical">
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_gravity="top"
+            android:layout_width="135dp"
+            android:paddingTop="10dp"
+            android:layout_height="100dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp" />
+        <TextView
+            android:id="@+id/textViewTime"
+            android:layout_gravity="bottom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12dp"
+            android:textColor="#08088A"
+            android:layout_marginLeft="5dp"
+            android:paddingLeft="5dp"/>
+    </FrameLayout>
 
     <TextView
         android:id="@+id/textView1"

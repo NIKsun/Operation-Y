@@ -44,7 +44,8 @@ import java.util.List;
 public class ListOfCars extends Activity {
     Toast toastErrorConnection, toastErrorCarList;
     AlertDialog.Builder ad;
-    String requestAvito, requestAuto, lastCarDate;
+    String requestAvito, requestAuto, lastCarDateAvito, lastCarDateAuto;
+    Boolean isListDownloading;
     LoadListView loader = new LoadListView();
     LoadListView.LoadImage[] imageLoaders = null;
 
@@ -121,7 +122,7 @@ public class ListOfCars extends Activity {
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         requestAuto = sPref.getString("SearchMyCarRequest", "");
         requestAvito = sPref.getString("SearchMyCarRequestAvito", "");
-        lastCarDate = null;
+        isListDownloading = true;
         loader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, requestAuto, requestAvito);
     }
 
@@ -137,7 +138,14 @@ public class ListOfCars extends Activity {
                 SharedPreferences.Editor ed = sPref.edit();
                 ed.putString("SearchMyCarServiceRequestAuto" + buttonNumber, requestAuto);
                 ed.putString("SearchMyCarServiceRequestAvito" + buttonNumber, requestAvito);
-                ed.putString("SearchMyCarServiceLastCarDate" + buttonNumber, lastCarDate);
+                if(lastCarDateAvito == null)
+                    ed.putString("SearchMyCarService_LastCarDateAvito" + buttonNumber, "###");
+                else
+                    ed.putString("SearchMyCarService_LastCarDateAvito" + buttonNumber, lastCarDateAvito);
+                if(lastCarDateAuto == null)
+                    ed.putString("SearchMyCarService_LastCarDateAuto" + buttonNumber, "###");
+                else
+                    ed.putString("SearchMyCarService_LastCarDateAuto" + buttonNumber, lastCarDateAuto);
                 ed.putInt("SearchMyCarService_period" + buttonNumber, 6);
                 Log.i("Bar23", String.valueOf(buttonNumber));
                 String[] newStatus = sPref.getString("SearchMyCarService_status", "").split(";");
@@ -184,7 +192,7 @@ public class ListOfCars extends Activity {
         switch (v.getId()) {
             case R.id.buttonMonitor1:
                 if (status[0].equals("true")) {
-                    intent.putExtra("MonitorNumber", 1);
+                    intent.putExtra("NotificationMessage", 1);
                     startActivity(intent);
                     return;
                 } else
@@ -192,7 +200,7 @@ public class ListOfCars extends Activity {
                 break;
             case R.id.buttonMonitor2:
                 if (status[1].equals("true")) {
-                    intent.putExtra("MonitorNumber", 2);
+                    intent.putExtra("NotificationMessage", 2);
                     startActivity(intent);
                     return;
                 } else
@@ -200,14 +208,14 @@ public class ListOfCars extends Activity {
                 break;
             case R.id.buttonMonitor3:
                 if (status[2].equals("true")) {
-                    intent.putExtra("MonitorNumber", 3);
+                    intent.putExtra("NotificationMessage", 3);
                     startActivity(intent);
                     return;
                 } else
                     buttonNumber = 3;
                 break;
         }
-        if(lastCarDate == null)
+        if(isListDownloading)
             Toast.makeText(getApplicationContext(), "Подождите загрузки списка", Toast.LENGTH_SHORT).show();
         else
             ad.show();
@@ -316,16 +324,18 @@ public class ListOfCars extends Activity {
             }
             if(!bulAvito[0] || !connectionAvitoSuccess[0])
                 carsAvito[0] = new Cars(0);
+            else
+                lastCarDateAvito = carsAvito[0].getCarDateString(0);
             if(!bulAvto || !connectionAutoSuccess)
                 carsAvto[0] = new Cars(0);
+            else
+                lastCarDateAuto = carsAvto[0].getCarDateString(0);
 
             Cars cars = Cars.merge(carsAvto[0], carsAvito[0]);
             Bitmap LoadingImage = BitmapFactory.decodeResource(getResources(), R.drawable.res);
             images = new Bitmap[cars.getLenth()];
             for(int i=0;i<cars.getLenth();i++)
                 images[i] = LoadingImage;
-
-            lastCarDate = cars.getLastCarDate();
 
             return cars;
         }
@@ -348,6 +358,7 @@ public class ListOfCars extends Activity {
                 return;
             }
 
+            isListDownloading = false;
             Toast.makeText(ListOfCars.this, "Найдено " + carsAvto[0].getLenth() + " ПОСЛЕДНИХ объявлений на Auto.ru и "
                     + carsAvito[0].getLenth() + " на Avito.ru, отсортировано по дате", Toast.LENGTH_LONG).show();
 
