@@ -118,6 +118,15 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
         //clear probeg
         sPref.edit().putInt("Probeg", 61).commit();
 
+        //clear trans
+        sPref.edit().putString("Trans","").commit();
+        //clear engine type
+        sPref.edit().putString("EngineType","").commit();
+        //clear privod
+        sPref.edit().putString("Privod","").commit();
+        //clear body
+        sPref.edit().putString("Body","").commit();
+
 
     }
 
@@ -151,6 +160,75 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 int probegval = sPref.getInt("Probeg",61);
                 String[] probeg_arr_avto = new String[]{"0","5000","10000","15000","20000","25000","30000","35000","40000","45000","50000","55000", "60000", "65000", "70000","75000","80000","85000","90000","95000","100000","110000","120000","130000","140000","150000","160000","170000","180000","190000","200000","210000","220000","230000","240000","250000","260000","270000","280000","290000","300000","310000","320000","330000","340000","350000","360000","370000","380000","390000","400000","410000","420000","430000","440000","450000","460000","470000","480000","490000","500000","100000000"};
                 String[] probeg_arr_avito = new String[]{"15483", "15486", "15487", "15490", "15492", "15494", "15496", "15498", "15500", "15502", "15505", "15506", "15509", "15510", "15512", "15513", "15516", "15517", "15520", "15521", "15524", "15527", "15528", "15531", "15533", "15535", "15536", "15539", "15540", "15542", "15544", "15545", "15546", "15547", "15548", "15554", "15556", "15557", "15558", "15559", "15560", "15561", "15562", "15563", "15564", "15565", "15566", "15567", "15568", "15569", "15570", "15571", "15572", "15573", "15574", "15575", "15576", "15577", "15578", "15579", "15581", "15582"};
+
+                //trans
+                String trans_str = sPref.getString("Trans", "");
+                if(trans_str.equals(""))
+                    trans_str="1234";
+                String[] trans = trans_str.split("");
+
+                String[] trans_arr_avito = {"","860-","861-","14754-","14753-"};
+                String trans_avito_req = ".185_";
+
+                String[] trans_arr_avto = {"","&search%5Bgearbox%5D%5Bautomatic_auto%5D=1","&search%5Bgearbox%5D%5Bmanual_all%5D=1","&search%5Bgearbox%5D%5Bautomatic_robot%5D=1","&search%5Bgearbox%5D%5Bautomatic_variator%5D=1"};
+                String trans_avto_req = "";
+                for(int i = 1; i < trans.length; ++i){
+                    trans_avto_req+=trans_arr_avto[Integer.parseInt(trans[i])];
+                    trans_avito_req+=trans_arr_avito[Integer.parseInt(trans[i])];
+                }
+
+
+                //enginetype
+                String engine_str = sPref.getString("EngineType", "");
+                if(engine_str.equals(""))
+                    engine_str="12345";
+                String[] engine = engine_str.split("");
+
+                String[] engine_arr_avito = {"","862-","864-","863-","14752-","14751-"};
+                String engine_avito_req = ".186_";
+
+                String[] engine_arr_avto = {"","&search%5Bengine_type%5D%5Bgasoline%5D=1","&search%5Bengine_type%5D%5B1260%5D=1","&search%5Bengine_type%5D%5B1256%5D=1","&search%5Bengine_type%5D%5B1262%5D=1","&search%5Bengine_type%5D%5B1257%5D=1"};
+                String engine_avto_req = "";
+                for(int i = 1; i < engine.length; ++i){
+                    engine_avto_req+=engine_arr_avto[Integer.parseInt(engine[i])];
+                    engine_avito_req +=engine_arr_avito[Integer.parseInt(engine[i])];
+                }
+
+
+                //privod
+                String privod_str = sPref.getString("Privod","");
+                if(privod_str.equals(""))
+                    privod_str="123";
+                String[] privod = privod_str.split("");
+
+                String[] privod_arr_avito = {"","8851-","8852-","8853-"};
+                String privod_avito_req = ".695_";
+
+                String[] privod_arr_avto = {"","&search%5Bdrive%5D%5B180%5D=1","&search%5Bdrive%5D%5B181%5D=1","&search%5Bdrive%5D%5B7%5D=1"};
+                String privod_avto_req = "";
+                for(int i = 1; i < privod.length; ++i){
+                    privod_avto_req+=privod_arr_avto[Integer.parseInt(privod[i])];
+                    privod_avito_req+=privod_arr_avito[Integer.parseInt(privod[i])];
+                }
+
+
+                //body
+                String body_str = sPref.getString("Body","");
+                if(body_str.equals(""))
+                    body_str="123";
+                String[] body = body_str.split("");
+
+                String[] body_arr_avito = {"","869-","872-","870-","4804-","4806-","867-","866-","865-","871-","868-"};
+                String body_avito_req = ".187_";
+
+                String[] body_arr_avto = {"","&search%5Bbody_type%5D%5Bg_sedan%5D=1","&search%5Bbody_type%5D%5Bg_hatchback%5D=1","&search%5Bbody_type%5D%5Bg_wagon%5D=1","&search%5Bbody_type%5D%5Bg_offroad%5D=1","&search%5Bbody_type%5D%5Bg_minivan%5D=1","&search%5Bbody_type%5D%5Bg_limousine%5D=1","&search%5Bbody_type%5D%5Bg_coupe%5D=1","&search%5Bbody_type%5D%5Bg_cabrio%5D=1","&search%5Bbody_type%5D%5Bg_furgon%5D=1","&search%5Bbody_type%5D%5Bg_pickup%5D=1"};
+                String body_avto_req = "";
+                for(int i = 1; i < body.length; ++i){
+                    body_avto_req+=body_arr_avto[Integer.parseInt(body[i])];
+                    body_avito_req+=body_arr_avito[Integer.parseInt(body[i])];
+                }
+
+
                 //constructor for auto.ru
                 String begin = "http://auto.ru/cars";
                 String end = "/all/?sort%5Bcreate_date%5D=desc";
@@ -206,7 +284,7 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 String photoa = "";
                 String eng_vol1a = "1374_";
                 String eng_vol2a = "b";
-                String probega = "1375_"+"15483"+"b"+probeg_arr_avito[probegval]+".";
+                String probega = "1375_"+"15483"+"b"+probeg_arr_avito[probegval];
 
                 CheckBox is_photo = (CheckBox) this.findViewById(R.id.checkBox);
                 if(is_photo.isChecked()){
@@ -248,9 +326,9 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 String requestauto = "###";
                 String requestavito = "###";
                 if(!(marka.equals("###")) && !(model.equals("###")))
-                    requestauto = begin + marka + model + end + year1 + startYear.toString() + year2 + endYear.toString() + price1 + price2+photo+eng_vol1+volume_arr_avto[startVolume]+eng_vol2+volume_arr_avto[endVolume]+probeg;
+                    requestauto = begin + marka + model + end + year1 + startYear.toString() + year2 + endYear.toString() + price1 + price2+photo+eng_vol1+volume_arr_avto[startVolume]+eng_vol2+volume_arr_avto[endVolume]+probeg+body_avto_req+privod_avto_req+trans_avto_req+engine_avto_req;
                 if(!(markaavito.equals("###")) && !(modelavito.equals("###")))
-                    requestavito = begin_avito+markaavito+modelavito+"/?"+photoa+price1a+startPrice+price2a+endPrice+"&f="+year1a+startYearAvito+year2a+endYearAvito+"."+eng_vol1a+volume_arr_avito[startVolume]+eng_vol2a+volume_arr_avito[endVolume]+"."+probega;
+                    requestavito = begin_avito+markaavito+modelavito+"/?"+photoa+price1a+startPrice+price2a+endPrice+"&f="+year1a+startYearAvito+year2a+endYearAvito+"."+eng_vol1a+volume_arr_avito[startVolume]+eng_vol2a+volume_arr_avito[endVolume]+"."+probega+body_avito_req+privod_avito_req+trans_avito_req+engine_avito_req;
                 ed.putString("SearchMyCarRequest", requestauto);
                 ed.putString("SearchMyCarRequestAvito", requestavito);
 
@@ -651,27 +729,261 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
         dialogPicker.show();
     }
     public void showMultiChecker(int n){
-        final Dialog dialogPicker = new Dialog(CreateRequestActivity.this);
+        final Dialog dialog = new Dialog(CreateRequestActivity.this);
+        Button ok;
+        final String[] result = {""};
+        final SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         switch (n){
             case 1:
-                dialogPicker.setTitle("Коробка передач");
-                dialogPicker.setContentView(R.layout.trans_checkbox);
-                dialogPicker.show();
+                dialog.setTitle("Коробка передач");
+                dialog.setContentView(R.layout.trans_checkbox);
+                dialog.show();
+
+                String old = sPref.getString("Trans","");
+                if(!old.equals("")) {
+                    String[] older = old.split("");
+                    CheckBox[] t = new CheckBox[4];
+                    t[0] = (CheckBox) dialog.findViewById(R.id.checkBoxtrans1);
+                    t[1] = (CheckBox) dialog.findViewById(R.id.checkBoxtrans2);
+                    t[2] = (CheckBox) dialog.findViewById(R.id.checkBoxtrans3);
+                    t[3] = (CheckBox) dialog.findViewById(R.id.checkBoxtrans4);
+                    for (int i = 1; i < older.length; ++i) {
+                        t[Integer.parseInt(older[i])-1].setChecked(true);
+                    }
+                }
+
+                ok = (Button) dialog.findViewById(R.id.transCheckBox);
+                ok.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        CheckBox auto = (CheckBox) dialog.findViewById(R.id.checkBoxtrans1);
+                        CheckBox man = (CheckBox) dialog.findViewById(R.id.checkBoxtrans2);
+                        CheckBox rob = (CheckBox) dialog.findViewById(R.id.checkBoxtrans3);
+                        CheckBox var = (CheckBox) dialog.findViewById(R.id.checkBoxtrans4);
+                        result[0] = "";
+                        if(auto.isChecked()){
+                            result[0] += "1";
+                        }
+                        if(man.isChecked()){
+                            result[0] += "2";
+                        }
+                        if(rob.isChecked()){
+                            result[0] += "3";
+                        }
+                        if(var.isChecked()){
+                            result[0] += "4";
+                        }
+
+                        sPref.edit().putString("Trans", result[0]).commit();
+
+                        Button b2 = (Button) findViewById(R.id.trans_button);
+                        b2.setText("КПП ("+result[0].length()+")");
+
+                        Button b3 = (Button) findViewById(R.id.clear_trans);
+                        b3.setVisibility(View.VISIBLE);
+
+                        dialog.dismiss();
+
+                    }
+                });
                 break;
             case 2:
-                dialogPicker.setTitle("Тип двигателя");
-                dialogPicker.setContentView(R.layout.engine_type_checkbox);
-                dialogPicker.show();
+                dialog.setTitle("Тип двигателя");
+                dialog.setContentView(R.layout.engine_type_checkbox);
+                dialog.show();
+
+
+                String old1 = sPref.getString("EngineType","");
+                if(!old1.equals("")) {
+                    String[] older = old1.split("");
+                    CheckBox[] t = new CheckBox[5];
+                    t[0] = (CheckBox) dialog.findViewById(R.id.checkBoxenginetype1);
+                    t[1] = (CheckBox) dialog.findViewById(R.id.checkBoxenginetype2);
+                    t[2] = (CheckBox) dialog.findViewById(R.id.checkBoxenginetype3);
+                    t[3] = (CheckBox) dialog.findViewById(R.id.checkBoxenginetype4);
+                    t[4] = (CheckBox) dialog.findViewById(R.id.checkBoxenginetype5);
+                    for (int i = 1; i < older.length; ++i) {
+                        t[Integer.parseInt(older[i])-1].setChecked(true);
+                    }
+                }
+
+                ok = (Button) dialog.findViewById(R.id.enginetypeCheckBox);
+                ok.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        CheckBox eng1 = (CheckBox) dialog.findViewById(R.id.checkBoxenginetype1);
+                        CheckBox eng2 = (CheckBox) dialog.findViewById(R.id.checkBoxenginetype2);
+                        CheckBox eng3 = (CheckBox) dialog.findViewById(R.id.checkBoxenginetype3);
+                        CheckBox eng4 = (CheckBox) dialog.findViewById(R.id.checkBoxenginetype4);
+                        CheckBox eng5 = (CheckBox) dialog.findViewById(R.id.checkBoxenginetype5);
+                        result[0] = "";
+                        if (eng1.isChecked()) {
+                            result[0] += "1";
+                        }
+                        if (eng2.isChecked()) {
+                            result[0] += "2";
+                        }
+                        if (eng3.isChecked()) {
+                            result[0] += "3";
+                        }
+                        if (eng4.isChecked()) {
+                            result[0] += "4";
+                        }
+                        if (eng5.isChecked()) {
+                            result[0] += "5";
+                        }
+
+                        sPref.edit().putString("EngineType", result[0]).commit();
+
+                        Button b2 = (Button) findViewById(R.id.engine_button);
+                        b2.setText("Тип двигателя (" + result[0].length() + ")");
+
+                        Button b3 = (Button) findViewById(R.id.clear_engine);
+                        b3.setVisibility(View.VISIBLE);
+
+                        dialog.dismiss();
+
+                    }
+                });
                 break;
             case 3:
-                dialogPicker.setTitle("Привод");
-                dialogPicker.setContentView(R.layout.privod_checkbox);
-                dialogPicker.show();
+                dialog.setTitle("Привод");
+                dialog.setContentView(R.layout.privod_checkbox);
+                dialog.show();
+
+                String old2 = sPref.getString("Privod","");
+                if(!old2.equals("")) {
+                    String[] older = old2.split("");
+                    CheckBox[] t = new CheckBox[3];
+                    t[0] = (CheckBox) dialog.findViewById(R.id.checkBoxprivod1);
+                    t[1] = (CheckBox) dialog.findViewById(R.id.checkBoxprivod2);
+                    t[2] = (CheckBox) dialog.findViewById(R.id.checkBoxprivod3);
+                    for (int i = 1; i < older.length; ++i) {
+                        t[Integer.parseInt(older[i])-1].setChecked(true);
+                    }
+                }
+
+                ok = (Button) dialog.findViewById(R.id.privodCheckBox);
+                ok.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        CheckBox pr1 = (CheckBox) dialog.findViewById(R.id.checkBoxprivod1);
+                        CheckBox pr2 = (CheckBox) dialog.findViewById(R.id.checkBoxprivod2);
+                        CheckBox pr3 = (CheckBox) dialog.findViewById(R.id.checkBoxprivod3);
+                        result[0] = "";
+                        if (pr1.isChecked()) {
+                            result[0] += "1";
+                        }
+                        if (pr2.isChecked()) {
+                            result[0] += "2";
+                        }
+                        if (pr3.isChecked()) {
+                            result[0] += "3";
+                        }
+
+                        sPref.edit().putString("Privod", result[0]).commit();
+
+                        Button b2 = (Button) findViewById(R.id.privod_button);
+                        b2.setText("Привод (" + result[0].length() + ")");
+
+                        Button b3 = (Button) findViewById(R.id.clear_privod);
+                        b3.setVisibility(View.VISIBLE);
+
+                        dialog.dismiss();
+
+                    }
+                });
                 break;
             case 4:
-                dialogPicker.setTitle("Тип кузова");
-                dialogPicker.setContentView(R.layout.body_checkbox);
-                dialogPicker.show();
+                dialog.setTitle("Тип кузова");
+                dialog.setContentView(R.layout.body_checkbox);
+                dialog.show();
+
+                String old3 = sPref.getString("Body","");
+                if(!old3.equals("")) {
+                    String[] older = old3.split("");
+                    CheckBox[] t = new CheckBox[10];
+                    t[0] = (CheckBox) dialog.findViewById(R.id.checkBoxbody1);
+                    t[1]  = (CheckBox) dialog.findViewById(R.id.checkBoxbody2);
+                    t[2]  = (CheckBox) dialog.findViewById(R.id.checkBoxbody3);
+                    t[3]  = (CheckBox) dialog.findViewById(R.id.checkBoxbody4);
+                    t[4]  = (CheckBox) dialog.findViewById(R.id.checkBoxbody5);
+                    t[5]  = (CheckBox) dialog.findViewById(R.id.checkBoxbody6);
+                    t[6]  = (CheckBox) dialog.findViewById(R.id.checkBoxbody7);
+                    t[7]  = (CheckBox) dialog.findViewById(R.id.checkBoxbody8);
+                    t[8]  = (CheckBox) dialog.findViewById(R.id.checkBoxbody9);
+                    t[9]  = (CheckBox) dialog.findViewById(R.id.checkBoxbody10);
+                    for (int i = 1; i < older.length; ++i) {
+                        if(Integer.parseInt(older[i])==0){
+                            t[9].setChecked(true);
+                            continue;
+                        }
+                        t[Integer.parseInt(older[i])-1].setChecked(true);
+                    }
+                }
+
+                ok = (Button) dialog.findViewById(R.id.bodyCheckBox);
+                ok.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        CheckBox b1 = (CheckBox) dialog.findViewById(R.id.checkBoxbody1);
+                        CheckBox b2 = (CheckBox) dialog.findViewById(R.id.checkBoxbody2);
+                        CheckBox b3 = (CheckBox) dialog.findViewById(R.id.checkBoxbody3);
+                        CheckBox b4 = (CheckBox) dialog.findViewById(R.id.checkBoxbody4);
+                        CheckBox b5 = (CheckBox) dialog.findViewById(R.id.checkBoxbody5);
+                        CheckBox b6 = (CheckBox) dialog.findViewById(R.id.checkBoxbody6);
+                        CheckBox b7 = (CheckBox) dialog.findViewById(R.id.checkBoxbody7);
+                        CheckBox b8 = (CheckBox) dialog.findViewById(R.id.checkBoxbody8);
+                        CheckBox b9 = (CheckBox) dialog.findViewById(R.id.checkBoxbody9);
+                        CheckBox b10 = (CheckBox) dialog.findViewById(R.id.checkBoxbody10);
+                        result[0] = "";
+                        if (b1.isChecked()) {
+                            result[0] += "1";
+                        }
+                        if (b2.isChecked()) {
+                            result[0] += "2";
+                        }
+                        if (b3.isChecked()) {
+                            result[0] += "3";
+                        }
+                        if (b4.isChecked()) {
+                            result[0] += "4";
+                        }
+                        if (b5.isChecked()) {
+                            result[0] += "5";
+                        }
+                        if (b6.isChecked()) {
+                            result[0] += "6";
+                        }
+                        if (b7.isChecked()) {
+                            result[0] += "7";
+                        }
+                        if (b8.isChecked()) {
+                            result[0] += "8";
+                        }
+                        if (b9.isChecked()) {
+                            result[0] += "9";
+                        }
+                        if (b10.isChecked()) {
+                            result[0] += "0";
+                        }
+
+                        sPref.edit().putString("Body", result[0]).commit();
+
+                        Button button = (Button) findViewById(R.id.body_button);
+                        button.setText("Тип кузова (" + result[0].length() + ")");
+
+                        Button button1 = (Button) findViewById(R.id.clear_body);
+                        button1.setVisibility(View.VISIBLE);
+
+                        dialog.dismiss();
+
+                    }
+                });
                 break;
             default:
                 break;
@@ -734,6 +1046,42 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 sPref.edit().putInt("SelectedModel", 0).commit();
 
                 b3 = (Button) findViewById(R.id.clear_model);
+                b3.setVisibility(View.INVISIBLE);
+                break;
+            case R.id.clear_trans:
+                b2 = (Button) findViewById(R.id.trans_button);
+                b2.setText("КПП");
+
+                sPref.edit().putString("Trans", "").commit();
+
+                b3 = (Button) findViewById(R.id.clear_trans);
+                b3.setVisibility(View.INVISIBLE);
+                break;
+            case R.id.clear_engine:
+                b2 = (Button) findViewById(R.id.engine_button);
+                b2.setText("Тип двигателя");
+
+                sPref.edit().putString("EngineType", "").commit();
+
+                b3 = (Button) findViewById(R.id.clear_engine);
+                b3.setVisibility(View.INVISIBLE);
+                break;
+            case R.id.clear_privod:
+                b2 = (Button) findViewById(R.id.privod_button);
+                b2.setText("Привод");
+
+                sPref.edit().putString("Privod", "").commit();
+
+                b3 = (Button) findViewById(R.id.clear_privod);
+                b3.setVisibility(View.INVISIBLE);
+                break;
+            case R.id.clear_body:
+                b2 = (Button) findViewById(R.id.body_button);
+                b2.setText("Тип кузова");
+
+                sPref.edit().putString("Body", "").commit();
+
+                b3 = (Button) findViewById(R.id.clear_body);
                 b3.setVisibility(View.INVISIBLE);
                 break;
             default:
