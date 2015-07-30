@@ -1,41 +1,108 @@
 package com.example.searchmycarandroid;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.NumberPicker;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
 public class CreateRequestActivity extends Activity implements OnClickListener {
     DBHelper dbHelper;
     static Dialog dialogPicker ;
+    Boolean isUseSearchInAvito = null;
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.create_req_menu, menu);
+        menu.findItem(R.id.cr_req_menu_check).setChecked(isUseSearchInAvito);
+        return super.onCreateOptionsMenu(menu);
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(CreateRequestActivity.this);
+        if(item.getTitle().equals("Справка")) {
+            builder.setTitle("Справка").setMessage("Приложние создано для того, чтобы облегчить утомительный процесс поиска Вашего будущего автомобиля. В этом Вам помогут мониторы, которые будут вести поиск по указанным параметрам на ведущих автомобильных порталах России.\nВы используете первую версию приложения, однако Ваши отзывы и предложения помогут нам сделать его лучше и эффективнее.\nУдачных покупок!").setCancelable(true).setNegativeButton("Отмена",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
+        else
+        {
+            isUseSearchInAvito = !isUseSearchInAvito;
+            SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+            sPref.edit().putBoolean("isUseSearchInAvito",isUseSearchInAvito).commit();
+            item.setChecked(isUseSearchInAvito);
+            if(isUseSearchInAvito)
+                Toast.makeText(CreateRequestActivity.this,"Поиск на Авито включен",Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(CreateRequestActivity.this,"Поиск на Авито отключен",Toast.LENGTH_SHORT).show();
+
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     protected void onResume(){
         super.onResume();
+
+
+        ActivityManager am = (ActivityManager)this.getSystemService(ACTIVITY_SERVICE);
+        List<ActivityManager.RunningServiceInfo> rs = am.getRunningServices(1000);
+        Boolean serviceRunning = false;
+        for (int i=0; i<rs.size(); i++)
+        {
+            if(rs.get(i).service.getClassName().equals("com.example.searchmycarandroid.MonitoringService")) {
+                serviceRunning = true;
+                break;
+            }
+        }
+        SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+        isUseSearchInAvito = sPref.getBoolean("isUseSearchInAvito",true);
+        if(!serviceRunning){
+            sPref.edit().putString("SearchMyCarService_status","false;false;false").commit();
+        }
+
+        Button bmon = (Button) findViewById(R.id.buttonMon);
+        String status = sPref.getString("SearchMyCarService_status", "");
+        if(status.equals("false;false;false"))
+            bmon.setVisibility(View.INVISIBLE);
+        else
+            bmon.setVisibility(View.VISIBLE);
         Button b = (Button) findViewById(R.id.marka_button);
         Button b1 = (Button) findViewById(R.id.model_button);
-        SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         if(sPref.contains("SelectedMark"))
         {
 //nen
@@ -174,6 +241,8 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                     trans_avto_req+=trans_arr_avto[Integer.parseInt(trans[i])];
                     trans_avito_req+=trans_arr_avito[Integer.parseInt(trans[i])];
                 }
+                if(trans_str.equals("1234"))
+                    trans_avto_req="";
 
 
                 //enginetype
@@ -191,6 +260,8 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                     engine_avto_req+=engine_arr_avto[Integer.parseInt(engine[i])];
                     engine_avito_req +=engine_arr_avito[Integer.parseInt(engine[i])];
                 }
+                if(engine_str.equals("12345"))
+                    engine_avto_req="";
 
 
                 //privod
@@ -208,12 +279,14 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                     privod_avto_req+=privod_arr_avto[Integer.parseInt(privod[i])];
                     privod_avito_req+=privod_arr_avito[Integer.parseInt(privod[i])];
                 }
+                if(privod_str.equals("123"))
+                    privod_avto_req="";
 
 
                 //body
                 String body_str = sPref.getString("Body","");
                 if(body_str.equals(""))
-                    body_str="123";
+                    body_str="1234567890";
                 String[] body = body_str.split("");
 
                 String[] body_arr_avito = {"","869-","872-","870-","4804-","4806-","867-","866-","865-","871-","868-"};
@@ -222,9 +295,16 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 String[] body_arr_avto = {"","&search%5Bbody_type%5D%5Bg_sedan%5D=1","&search%5Bbody_type%5D%5Bg_hatchback%5D=1","&search%5Bbody_type%5D%5Bg_wagon%5D=1","&search%5Bbody_type%5D%5Bg_offroad%5D=1","&search%5Bbody_type%5D%5Bg_minivan%5D=1","&search%5Bbody_type%5D%5Bg_limousine%5D=1","&search%5Bbody_type%5D%5Bg_coupe%5D=1","&search%5Bbody_type%5D%5Bg_cabrio%5D=1","&search%5Bbody_type%5D%5Bg_furgon%5D=1","&search%5Bbody_type%5D%5Bg_pickup%5D=1"};
                 String body_avto_req = "";
                 for(int i = 1; i < body.length; ++i){
+                    if(Integer.parseInt(body[i])==0){
+                        body_avto_req+= body_arr_avto[10];
+                        body_avito_req+=body_arr_avito[10];
+                        continue;
+                    }
                     body_avto_req+=body_arr_avto[Integer.parseInt(body[i])];
                     body_avito_req+=body_arr_avito[Integer.parseInt(body[i])];
                 }
+                if(body_str.equals("1234567890"))
+                    body_avto_req="";
 
 
                 //constructor for auto.ru
@@ -323,10 +403,10 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 //put two request
                 String requestauto = "###";
                 String requestavito = "###";
-
                 if(!(marka.equals("/###")) && !(model.equals("/###")))
                     requestauto = begin + marka + model + end + year1 + startYear.toString() + year2 + endYear.toString() + price1 + price2+photo+eng_vol1+volume_arr_avto[startVolume]+eng_vol2+volume_arr_avto[endVolume]+probeg+body_avto_req+privod_avto_req+trans_avto_req+engine_avto_req;
-                if(!(markaavito.equals("/###")) && !(modelavito.equals("/###")))
+                Log.i("Hello", String.valueOf(isUseSearchInAvito));
+                if(!(markaavito.equals("/###")) && !(modelavito.equals("/###")) && isUseSearchInAvito)
                     requestavito = begin_avito+markaavito+modelavito+"/?"+photoa+price1a+startPrice+price2a+endPrice+"&f="+year1a+startYearAvito+year2a+endYearAvito+"."+eng_vol1a+volume_arr_avito[startVolume]+eng_vol2a+volume_arr_avito[endVolume]+"."+probega+body_avito_req+privod_avito_req+trans_avito_req+engine_avito_req;
 
                 ed.putString("SearchMyCarRequest", requestauto);
@@ -500,10 +580,10 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
 
         Integer count_year = 1900 + new Date().getYear() - 1970 - 9 -4 -4 +1;
         np1.setMinValue(1);
-
         np1.setMaxValue(count_year);
         np2.setMinValue(1);
         np2.setMaxValue(count_year);
+
 
         final String[] year_arr = new String[count_year];
         year_arr[0]="1970";
@@ -1088,5 +1168,34 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 break;
 
         }
+    }
+    public void onClickMonitor(View v)
+    {
+        Dialog dialog = new Dialog(this);
+        dialog.setTitle("Меню мониторов");
+        dialog.setContentView(R.layout.find_monitor);
+
+        SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+        String status = sPref.getString("SearchMyCarService_status", "");
+        String[] stat = status.split(";");
+
+        TextView tvMonTitle1 = (TextView) dialog.findViewById(R.id.tv_mon1_title);
+        TextView tvMonTitle2 = (TextView) dialog.findViewById(R.id.tv_mon2_title);
+        TextView tvMonTitle3 = (TextView) dialog.findViewById(R.id.tv_mon3_title);
+        if (stat[0].equals("true"))
+            tvMonTitle1.setText(Html.fromHtml("Монитор 1 <font color=green face=cursive>(запущен)</font>"));
+        else
+            tvMonTitle1.setText(Html.fromHtml("Монитор 1 <font color=#D05555 face=cursive>(выключен)</font>"));
+        if (stat[1].equals("true"))
+            tvMonTitle2.setText(Html.fromHtml("Монитор 2 <font color=green face=cursive>(запущен)</font>"));
+        else
+            tvMonTitle2.setText(Html.fromHtml("Монитор 2 <font color=#D05555 face=cursive>(выключен)</font>"));
+        if (stat[2].equals("true"))
+            tvMonTitle3.setText(Html.fromHtml("Монитор 3 <font color=green face=cursive>(запущен)</font>"));
+        else
+            tvMonTitle3.setText(Html.fromHtml("Монитор 3 <font color=#D05555 face=cursive>(выключен)</font>"));
+
+
+        dialog.show();
     }
 }

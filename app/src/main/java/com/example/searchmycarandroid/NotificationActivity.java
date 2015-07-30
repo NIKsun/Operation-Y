@@ -17,6 +17,8 @@ import android.os.Handler;
 import android.text.BoringLayout;
 import android.text.Html;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -50,6 +52,25 @@ public class NotificationActivity extends Activity {
     LoadListViewMonitor loader = new LoadListViewMonitor();
     Boolean imageLoaderMayRunning;
     Thread imageLoader = null;
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add("Справка");
+        return super.onCreateOptionsMenu(menu);
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(NotificationActivity.this);
+        builder.setTitle("Справка").setMessage("бла-бла-бла").setCancelable(true).setNegativeButton("Отмена",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -89,7 +110,7 @@ public class NotificationActivity extends Activity {
                     public void onStopTrackingTouch(SeekBar seekBar) {
                         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
                         sPref.edit().putInt("SearchMyCarService_period" + monitorNumber, progress).commit();
-                        Toast.makeText(getApplicationContext(), "Новый период установлен", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Новый период мониторинга установлен", Toast.LENGTH_SHORT).show();
                     }
                 });
         super.onNewIntent(intent);

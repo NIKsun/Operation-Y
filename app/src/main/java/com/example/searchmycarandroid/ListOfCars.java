@@ -17,6 +17,8 @@ import android.os.Handler;
 import android.text.BoringLayout;
 import android.text.Html;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -52,6 +54,25 @@ public class ListOfCars extends Activity {
 
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add("Справка");
+        return super.onCreateOptionsMenu(menu);
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ListOfCars.this);
+        builder.setTitle("Справка").setMessage("бла-бла-бла").setCancelable(true).setNegativeButton("Отмена",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     protected void onDestroy() {
         loader.cancel(true);
         imageLoaderMayRunning = false;
@@ -60,7 +81,7 @@ public class ListOfCars extends Activity {
     }
     @Override
     protected void onPause() {
-        imageLoaderMayRunning = false;
+        //imageLoaderMayRunning = false;
         super.onPause();
     }
 
@@ -119,6 +140,7 @@ public class ListOfCars extends Activity {
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         requestAuto = sPref.getString("SearchMyCarRequest", "");
         requestAvito = sPref.getString("SearchMyCarRequestAvito", "");
+        Log.i("Hello World", requestAvito);
         isListDownloading = true;
         loader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, requestAuto, requestAvito);
     }
@@ -143,7 +165,7 @@ public class ListOfCars extends Activity {
                     ed.putString("SearchMyCarService_LastCarDateAuto" + buttonNumber, "###");
                 else
                     ed.putString("SearchMyCarService_LastCarDateAuto" + buttonNumber, lastCarDateAuto);
-                ed.putInt("SearchMyCarService_period" + buttonNumber, 6);
+                ed.putInt("SearchMyCarService_period" + buttonNumber, 26);
                 Log.i("Bar23", String.valueOf(buttonNumber));
                 String[] newStatus = sPref.getString("SearchMyCarService_status", "").split(";");
                 newStatus[buttonNumber - 1] = "true";
