@@ -151,9 +151,9 @@ public class Cars {
         result.setSeconds(0);
         return result;
     }
-    public String getCarDateString(int i)
+    public long getCarDateLong(int i)
     {
-        return cars[i].timeOfCreate.toString();
+        return cars[i].timeOfCreate.getTime();
     }
     public Date getCarDate(int i)
     {

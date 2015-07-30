@@ -6,27 +6,29 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-        <TextView
-            android:id="@+id/tv_mon1_title"
+        <Button
+            android:id="@+id/bot_mon1_title"
             android:textSize="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/tv_mon1_desc"
             android:layout_width="match_parent"
+            android:textSize="20dp"
             android:layout_height="wrap_content" />
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-        <TextView
-            android:id="@+id/tv_mon2_title"
+        <Button
+            android:id="@+id/bot_mon2_title"
             android:textSize="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/tv_mon2_desc"
+            android:textSize="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </LinearLayout>
@@ -34,14 +36,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-        <TextView
-            android:id="@+id/tv_mon3_title"
+        <Button
+            android:id="@+id/bot_mon3_title"
             android:textSize="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/tv_mon3_desc"
-            android:textSize="22dp"
+            android:textSize="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" /></LinearLayout>
 

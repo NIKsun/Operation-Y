@@ -50,7 +50,7 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
     public boolean onOptionsItemSelected(MenuItem item) {
         AlertDialog.Builder builder = new AlertDialog.Builder(CreateRequestActivity.this);
         if(item.getTitle().equals("Справка")) {
-            builder.setTitle("Справка").setMessage("Приложние создано для того, чтобы облегчить утомительный процесс поиска Вашего будущего автомобиля. В этом Вам помогут мониторы, которые будут вести поиск по указанным параметрам на ведущих автомобильных порталах России.\nВы используете первую версию приложения, однако Ваши отзывы и предложения помогут нам сделать его лучше и эффективнее.\nУдачных покупок!").setCancelable(true).setNegativeButton("Отмена",
+            builder.setTitle("Справка").setMessage("Приложние создано для того, чтобы облегчить утомительный процесс поиска Вашего будущего автомобиля. Для этого в нем имеются мониторы, которые будут вести поиск по указанным параметрам на ведущих автомобильных порталах России.\nВы используете первую версию приложения, однако Ваши отзывы и предложения помогут нам сделать его лучше и эффективнее.\nУдачных покупок!").setCancelable(true).setNegativeButton("Отмена",
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             dialog.cancel();
@@ -90,17 +90,15 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
             }
         }
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-        isUseSearchInAvito = sPref.getBoolean("isUseSearchInAvito",true);
         if(!serviceRunning){
             sPref.edit().putString("SearchMyCarService_status","false;false;false").commit();
+            sPref.edit().putString("SearchMyCarService_shortMessage1","###").commit();
+            sPref.edit().putString("SearchMyCarService_shortMessage2","###").commit();
+            sPref.edit().putString("SearchMyCarService_shortMessage3","###").commit();
         }
+        isUseSearchInAvito = sPref.getBoolean("isUseSearchInAvito",true);
 
-        Button bmon = (Button) findViewById(R.id.buttonMon);
-        String status = sPref.getString("SearchMyCarService_status", "");
-        if(status.equals("false;false;false"))
-            bmon.setVisibility(View.INVISIBLE);
-        else
-            bmon.setVisibility(View.VISIBLE);
+
         Button b = (Button) findViewById(R.id.marka_button);
         Button b1 = (Button) findViewById(R.id.model_button);
         if(sPref.contains("SelectedMark"))
@@ -309,7 +307,7 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
 
                 //constructor for auto.ru
                 String begin = "http://auto.ru/cars";
-                String end = "/all/?sort%5Bcreate_date%5D=desc";
+                String end = "/all/?sort%5Bcreate_date%5D=desc&search%5Bgeo_region%5D=38%2C87";
                 String year1="&search%5Byear%5D%5Bmin%5D=";
                 String year2="&search%5Byear%5D%5Bmax%5D=";
                 String price1="&search%5Bprice%5D%5Bmin%5D="+startPrice+"%D1%80%D1%83%D0%B1.";
@@ -320,7 +318,7 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 String probeg = "&search%5Brun%5D%5Bmax%5D="+probeg_arr_avto[probegval]+"%D0%BA%D0%BC";
 
                 //constructor for avito
-                String begin_avito = "https://www.avito.ru/rossiya/avtomobili";
+                String begin_avito = "https://www.avito.ru/moskva/avtomobili";
                 Map<Integer, String> map = new HashMap<Integer, String>();
                 //region map create
                 map.put(1970,"782");
@@ -378,15 +376,18 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 //get mark
                 String marka = "";
                 String markaavito = "";
+                String marka_for_dialog = "###";
                 if(posMark!=0) {
                     Cursor cursorMark = db.query("marksTable", null, "id=?", new String[]{posMark.toString()}, null, null, null);
                     cursorMark.moveToFirst();
                     marka = "/" + cursorMark.getString(cursorMark.getColumnIndex("markarequest"));
                     markaavito = "/" + cursorMark.getString(cursorMark.getColumnIndex("markarequestavito"));
+                    marka_for_dialog = cursorMark.getString(cursorMark.getColumnIndex("markauser"));
                 }
                 //get model
                 String model = "";
                 String modelavito = "";
+                String model_for_dialog = "###";
                 if(posModel!=0) {
                     Cursor cursorModel = db.query("modelsTable", null, "marka_id=?", new String[]{posMark.toString()}, null, null, null);
                     cursorModel.moveToFirst();
@@ -398,17 +399,21 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
 
                     model = "/" + cursorModel.getString(cursorModel.getColumnIndex("modelrequest"));
                     modelavito = "/" + cursorModel.getString(cursorModel.getColumnIndex("modelrequestavito"));
+                    model_for_dialog = cursorModel.getString(cursorModel.getColumnIndex("modeluser"));
                 }
+
+                sPref.edit().putString("marka_for_dialog",marka_for_dialog).commit();
+                sPref.edit().putString("model_for_dialog",model_for_dialog).commit();
 
                 //put two request
                 String requestauto = "###";
                 String requestavito = "###";
                 if(!(marka.equals("/###")) && !(model.equals("/###")))
                     requestauto = begin + marka + model + end + year1 + startYear.toString() + year2 + endYear.toString() + price1 + price2+photo+eng_vol1+volume_arr_avto[startVolume]+eng_vol2+volume_arr_avto[endVolume]+probeg+body_avto_req+privod_avto_req+trans_avto_req+engine_avto_req;
-                Log.i("Hello", String.valueOf(isUseSearchInAvito));
+                Log.i("Hello", requestauto);
                 if(!(markaavito.equals("/###")) && !(modelavito.equals("/###")) && isUseSearchInAvito)
                     requestavito = begin_avito+markaavito+modelavito+"/?"+photoa+price1a+startPrice+price2a+endPrice+"&f="+year1a+startYearAvito+year2a+endYearAvito+"."+eng_vol1a+volume_arr_avito[startVolume]+eng_vol2a+volume_arr_avito[endVolume]+"."+probega+body_avito_req+privod_avito_req+trans_avito_req+engine_avito_req;
-
+                Log.i("Hello", requestavito);
                 ed.putString("SearchMyCarRequest", requestauto);
                 ed.putString("SearchMyCarRequestAvito", requestavito);
 
@@ -858,10 +863,16 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                         sPref.edit().putString("Trans", result[0]).commit();
 
                         Button b2 = (Button) findViewById(R.id.trans_button);
-                        b2.setText("КПП ("+result[0].length()+")");
-
+                        Integer count = result[0].length();
                         Button b3 = (Button) findViewById(R.id.clear_trans);
-                        b3.setVisibility(View.VISIBLE);
+
+                        if(count != 0){
+                            b2.setText("КПП ("+count+")");
+                            b3.setVisibility(View.VISIBLE);
+                        }
+                        else
+                            b2.setText("КПП");
+
 
                         dialog.dismiss();
 
@@ -918,10 +929,16 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                         sPref.edit().putString("EngineType", result[0]).commit();
 
                         Button b2 = (Button) findViewById(R.id.engine_button);
-                        b2.setText("Тип двигателя (" + result[0].length() + ")");
+                        Integer count = result[0].length();
 
                         Button b3 = (Button) findViewById(R.id.clear_engine);
-                        b3.setVisibility(View.VISIBLE);
+
+                        if(count != 0){
+                            b2.setText("Тип двигателя ("+count+")");
+                            b3.setVisibility(View.VISIBLE);
+                        }
+                        else
+                            b2.setText("Тип двигателя");
 
                         dialog.dismiss();
 
@@ -968,9 +985,14 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
 
                         Button b2 = (Button) findViewById(R.id.privod_button);
                         b2.setText("Привод (" + result[0].length() + ")");
-
+                        Integer count = result[0].length();
                         Button b3 = (Button) findViewById(R.id.clear_privod);
-                        b3.setVisibility(View.VISIBLE);
+                        if(count != 0){
+                            b2.setText("Привод (" + count + ")");
+                            b3.setVisibility(View.VISIBLE);
+                        }
+                        else
+                            b2.setText("Привод");
 
                         dialog.dismiss();
 
@@ -1058,7 +1080,14 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                         button.setText("Тип кузова (" + result[0].length() + ")");
 
                         Button button1 = (Button) findViewById(R.id.clear_body);
-                        button1.setVisibility(View.VISIBLE);
+
+                        Integer count = result[0].length();
+                        if(count != 0){
+                            button.setText("Тип кузова (" + result[0].length() + ")");
+                            button1.setVisibility(View.VISIBLE);
+                        }
+                        else
+                            button.setText("Тип кузова");
 
                         dialog.dismiss();
 
@@ -1171,31 +1200,74 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
     }
     public void onClickMonitor(View v)
     {
-        Dialog dialog = new Dialog(this);
+        final Dialog dialog = new Dialog(this);
         dialog.setTitle("Меню мониторов");
         dialog.setContentView(R.layout.find_monitor);
 
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         String status = sPref.getString("SearchMyCarService_status", "");
-        String[] stat = status.split(";");
+        final String[] stat = status.split(";");
 
-        TextView tvMonTitle1 = (TextView) dialog.findViewById(R.id.tv_mon1_title);
-        TextView tvMonTitle2 = (TextView) dialog.findViewById(R.id.tv_mon2_title);
-        TextView tvMonTitle3 = (TextView) dialog.findViewById(R.id.tv_mon3_title);
+        Button butMonTitle1 = (Button) dialog.findViewById(R.id.bot_mon1_title);
+        Button butMonTitle2 = (Button) dialog.findViewById(R.id.bot_mon2_title);
+        Button butMonTitle3 = (Button) dialog.findViewById(R.id.bot_mon3_title);
         if (stat[0].equals("true"))
-            tvMonTitle1.setText(Html.fromHtml("Монитор 1 <font color=green face=cursive>(запущен)</font>"));
-        else
-            tvMonTitle1.setText(Html.fromHtml("Монитор 1 <font color=#D05555 face=cursive>(выключен)</font>"));
+            butMonTitle1.setText(Html.fromHtml("Монитор 1 <font color=green face=cursive>(запущен)</font>"));
+        else{
+            butMonTitle1.setClickable(false);
+            butMonTitle1.setText(Html.fromHtml("Монитор 1 <font color=#D05555 face=cursive>(выключен)</font>"));
+        }
         if (stat[1].equals("true"))
-            tvMonTitle2.setText(Html.fromHtml("Монитор 2 <font color=green face=cursive>(запущен)</font>"));
-        else
-            tvMonTitle2.setText(Html.fromHtml("Монитор 2 <font color=#D05555 face=cursive>(выключен)</font>"));
+            butMonTitle2.setText(Html.fromHtml("Монитор 2 <font color=green face=cursive>(запущен)</font>"));
+        else{
+            butMonTitle2.setClickable(false);
+            butMonTitle2.setText(Html.fromHtml("Монитор 2 <font color=#D05555 face=cursive>(выключен)</font>"));
+        }
         if (stat[2].equals("true"))
-            tvMonTitle3.setText(Html.fromHtml("Монитор 3 <font color=green face=cursive>(запущен)</font>"));
-        else
-            tvMonTitle3.setText(Html.fromHtml("Монитор 3 <font color=#D05555 face=cursive>(выключен)</font>"));
+            butMonTitle3.setText(Html.fromHtml("Монитор 3 <font color=green face=cursive>(запущен)</font>"));
+        else{
+            butMonTitle3.setClickable(false);
+            butMonTitle3.setText(Html.fromHtml("Монитор 3 <font color=#D05555 face=cursive>(выключен)</font>"));
+        }
+
+        Log.i("shMes",sPref.getString("SearchMyCarService_shortMessage1","###"));
+        TextView tvDesc1 = (TextView) dialog.findViewById(R.id.tv_mon1_desc);
+        if(!sPref.getString("SearchMyCarService_shortMessage1","###").equals("###"))
+            tvDesc1.setText(sPref.getString("SearchMyCarService_shortMessage1", "###"));
+        TextView tvDesc2 = (TextView) dialog.findViewById(R.id.tv_mon2_desc);
+        if(!sPref.getString("SearchMyCarService_shortMessage2","###").equals("###"))
+            tvDesc2.setText(sPref.getString("SearchMyCarService_shortMessage2","###"));
+        TextView tvDesc3 = (TextView) dialog.findViewById(R.id.tv_mon3_desc);
+        if(!sPref.getString("SearchMyCarService_shortMessage3","###").equals("###"))
+            tvDesc3.setText(sPref.getString("SearchMyCarService_shortMessage3","###"));
+
+
+        OnClickListener monitorClick = new OnClickListener()
+        {
+            @Override
+            public void onClick(View v) {
+                int monitorNumber = 0;
+                switch(v.getId())
+                {
+                    case R.id.bot_mon1_title: monitorNumber=1;break;
+                    case R.id.bot_mon2_title: monitorNumber=2;break;
+                    case R.id.bot_mon3_title: monitorNumber=3;break;
+                }
+                if(stat[monitorNumber-1].equals("true"))
+                {
+                    Intent intent = new Intent(CreateRequestActivity.this, NotificationActivity.class);
+                    intent.putExtra("NotificationMessage", monitorNumber);
+                    startActivity(intent);
+                }
+            }
+        };
+        butMonTitle1.setOnClickListener(monitorClick);
+        butMonTitle2.setOnClickListener(monitorClick);
+        butMonTitle3.setOnClickListener(monitorClick);
 
 
         dialog.show();
     }
+
+
 }

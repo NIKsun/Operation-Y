@@ -97,7 +97,7 @@ public class MonitoringService extends Service {
                     boolean isConnected = true, isConnectedAvito = true;
                     if(!requestAuto.equals("###")) {
                         try {
-                            doc = Jsoup.connect(requestAuto).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").get();
+                            doc = Jsoup.connect(requestAuto).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").timeout(12000).get();
                         } catch (IOException e) {
                             isConnected = false;
                         }
@@ -123,7 +123,7 @@ public class MonitoringService extends Service {
                                 } else {
                                     for (int i = 0; i < listOfCars.size(); i++) {
                                         buf = Cars.getDateAuto(listOfCars.get(i).select("table > tbody > tr").first());
-                                        if (buf != null && Date.parse(lastCarDateAuto) < Date.parse(buf.toString()))
+                                        if (buf != null && Long.parseLong(lastCarDateAuto) < buf.getTime())
                                             counter[0]++;
                                     }
                                 }
@@ -133,7 +133,7 @@ public class MonitoringService extends Service {
                     Log.i("Monitor1", String.valueOf(counter[0]));
                     if(!requestAvito.equals("###")) {
                         try {
-                            doc = Jsoup.connect(requestAvito).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").get();
+                            doc = Jsoup.connect(requestAvito).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").timeout(12000).get();
                         } catch (Exception e) {
                             Log.i("Monitor", "error3");
                             if(isConnected)
@@ -151,7 +151,7 @@ public class MonitoringService extends Service {
                             } else {
                                 for (int i = 0; i < mainElems.size(); i++)
                                     for (int j = 0; j < mainElems.get(i).children().size(); j++) {
-                                        if (Date.parse(lastCarDateAvito) < Date.parse(Cars.getDateAvito(mainElems.get(i).children().get(j)).toString()))
+                                        if (Long.parseLong(lastCarDateAvito) < Cars.getDateAvito(mainElems.get(i).children().get(j)).getTime())
                                             counter[0]++;
                                     }
                             }
@@ -188,6 +188,6 @@ public class MonitoringService extends Service {
         notif.number = countOfNewCars;
         notif.sound = ringURI;
         notif.flags |= Notification.FLAG_AUTO_CANCEL | Notification.DEFAULT_SOUND | Notification.FLAG_ONLY_ALERT_ONCE;
-        nm.notify(1, notif);
+        nm.notify(serviceID, notif);
     }
 }

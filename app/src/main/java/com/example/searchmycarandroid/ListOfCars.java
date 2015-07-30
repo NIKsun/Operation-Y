@@ -47,7 +47,7 @@ import java.util.List;
 public class ListOfCars extends Activity {
     Toast toastErrorConnection, toastErrorCarList;
     AlertDialog.Builder ad;
-    String requestAvito, requestAuto, lastCarDateAvito, lastCarDateAuto;
+    String requestAvito, requestAuto, lastCarDateAvito, lastCarDateAuto, shortMessage;
     Boolean isListDownloading, imageLoaderMayRunning;
     LoadListView loader = new LoadListView();
     Thread imageLoader = null;
@@ -61,7 +61,10 @@ public class ListOfCars extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         AlertDialog.Builder builder = new AlertDialog.Builder(ListOfCars.this);
-        builder.setTitle("Справка").setMessage("бла-бла-бла").setCancelable(true).setNegativeButton("Отмена",
+        builder.setTitle("Справка").setMessage("На текущем экране отображены последние оставленные " +
+                "объявления на порталах Avito.ru и Auto.ru по введенным Вами характеристикам." +
+                " Для того, чтобы начать мониторинг текущего списка нажмите на любой свободный монитор.")
+                .setCancelable(true).setNegativeButton("Отмена",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
@@ -76,8 +79,8 @@ public class ListOfCars extends Activity {
     protected void onDestroy() {
         loader.cancel(true);
         imageLoaderMayRunning = false;
+        Log.i("Rot", "now1");
         super.onDestroy();
-        finish();
     }
     @Override
     protected void onPause() {
@@ -140,7 +143,16 @@ public class ListOfCars extends Activity {
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         requestAuto = sPref.getString("SearchMyCarRequest", "");
         requestAvito = sPref.getString("SearchMyCarRequestAvito", "");
-        Log.i("Hello World", requestAvito);
+        String mark = sPref.getString("marka_for_dialog", "###");
+        String model = sPref.getString("model_for_dialog", "###");
+        if(!mark.equals("###"))
+        {
+            shortMessage = mark;
+            if(!model.equals("###"))
+                shortMessage += " " + model;
+        }
+        else
+            shortMessage = "###";
         isListDownloading = true;
         loader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, requestAuto, requestAvito);
     }
@@ -165,11 +177,13 @@ public class ListOfCars extends Activity {
                     ed.putString("SearchMyCarService_LastCarDateAuto" + buttonNumber, "###");
                 else
                     ed.putString("SearchMyCarService_LastCarDateAuto" + buttonNumber, lastCarDateAuto);
-                ed.putInt("SearchMyCarService_period" + buttonNumber, 26);
-                Log.i("Bar23", String.valueOf(buttonNumber));
+                ed.putInt("SearchMyCarService_period" + buttonNumber, 0);
                 String[] newStatus = sPref.getString("SearchMyCarService_status", "").split(";");
                 newStatus[buttonNumber - 1] = "true";
                 ed.putString("SearchMyCarService_status", newStatus[0] + ";" + newStatus[1] + ";" + newStatus[2]);
+
+                Log.i("shMes",shortMessage);
+                ed.putString("SearchMyCarService_shortMessage" + buttonNumber, shortMessage);
                 ed.commit();
                 Intent serviceIntent = new Intent(ListOfCars.this, MonitoringService.class);
                 serviceIntent.putExtra("SearchMyCarService_serviceID", buttonNumber);
@@ -263,7 +277,7 @@ public class ListOfCars extends Activity {
                 public void run() {
                     Document doc;
                     try {
-                        doc = Jsoup.connect(params[1]).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").get();
+                        doc = Jsoup.connect(params[1]).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").timeout(12000).get();
                     }
                     catch (HttpStatusException e)
                     {
@@ -301,7 +315,7 @@ public class ListOfCars extends Activity {
             if(!params[0].equals("###")) {
                 Document doc = null;
                 try {
-                    doc = Jsoup.connect(params[0]).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").get();
+                    doc = Jsoup.connect(params[0]).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").timeout(12000).get();
                 } catch (IOException e) {
                     connectionAutoSuccess = false;
                 }
@@ -344,11 +358,17 @@ public class ListOfCars extends Activity {
             if(!bulAvito[0] || !connectionAvitoSuccess[0])
                 carsAvito[0] = new Cars(0);
             else
-                lastCarDateAvito = carsAvito[0].getCarDateString(0);
+                lastCarDateAvito = String.valueOf(carsAvito[0].getCarDateLong(0));
             if(!bulAvto || !connectionAutoSuccess)
                 carsAvto[0] = new Cars(0);
             else
-                lastCarDateAuto = carsAvto[0].getCarDateString(0);
+                lastCarDateAuto = String.valueOf(carsAvto[0].getCarDateLong(0));
+
+            if(carsAvto[0].getLenth() == 0 && carsAvito[0].getLenth() == 0)
+            {
+                toastErrorConnection.show();
+                return null;
+            }
 
             Cars cars = Cars.merge(carsAvto[0], carsAvito[0]);
             Bitmap LoadingImage = BitmapFactory.decodeResource(getResources(), R.drawable.res);

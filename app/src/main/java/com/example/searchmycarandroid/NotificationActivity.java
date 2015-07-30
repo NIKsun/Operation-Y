@@ -61,7 +61,9 @@ public class NotificationActivity extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         AlertDialog.Builder builder = new AlertDialog.Builder(NotificationActivity.this);
-        builder.setTitle("Справка").setMessage("бла-бла-бла").setCancelable(true).setNegativeButton("Отмена",
+        builder.setTitle("Справка").setMessage("Для изменения периода мониторинга текущего списка сдвиньте" +
+                " ползунок периода в нужное положение." +
+                " Слишком частый мониторинг может привести к быстой разрядке аккумулятора").setCancelable(true).setNegativeButton("Отмена",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
@@ -115,12 +117,13 @@ public class NotificationActivity extends Activity {
                 });
         super.onNewIntent(intent);
     }
+
     @Override
     protected void onDestroy() {
         loader.cancel(true);
         imageLoaderMayRunning = false;
+        Log.i("Rot","now2");
         super.onDestroy();
-        finish();
     }
     @Override
     protected void onPause() {
@@ -190,6 +193,8 @@ public class NotificationActivity extends Activity {
                 SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
                 String[] newStatus = sPref.getString("SearchMyCarService_status", "").split(";");
                 newStatus[monitorNumber - 1] = "false";
+
+                sPref.edit().putString("SearchMyCarService_shortMessage" + monitorNumber, "###");
                 sPref.edit().putString("SearchMyCarService_status", newStatus[0] + ";" + newStatus[1] + ";" + newStatus[2]).commit();
                 Toast.makeText(NotificationActivity.this, "Монитор " + monitorNumber + " остановлен", Toast.LENGTH_LONG).show();
                 finish();
@@ -228,7 +233,7 @@ public class NotificationActivity extends Activity {
                 public void run() {
                     Document doc;
                     try {
-                        doc = Jsoup.connect(params[1]).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").get();
+                        doc = Jsoup.connect(params[1]).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").timeout(12000).get();
                     }
                     catch (HttpStatusException e)
                     {
@@ -266,7 +271,7 @@ public class NotificationActivity extends Activity {
             if(!params[0].equals("###")) {
                 Document doc = null;
                 try {
-                    doc = Jsoup.connect(params[0]).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").get();
+                    doc = Jsoup.connect(params[0]).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").timeout(12000).get();
                 } catch (IOException e) {
                     connectionAutoSuccess = false;
                 }
@@ -311,12 +316,18 @@ public class NotificationActivity extends Activity {
             if(!bulAvito[0] || !connectionAvitoSuccess[0])
                 carsAvito[0] = new Cars(0);
             else
-                ed.putString("SearchMyCarService_LastCarDateAvito" + monitorNumber, carsAvito[0].getCarDateString(0));;
+                ed.putString("SearchMyCarService_LastCarDateAvito" + monitorNumber, String.valueOf(carsAvito[0].getCarDateLong(0)));;
             if(!bulAvto || !connectionAutoSuccess)
                 carsAvto[0] = new Cars(0);
             else
-                ed.putString("SearchMyCarService_LastCarDateAuto" + monitorNumber, carsAvto[0].getCarDateString(0));
+                ed.putString("SearchMyCarService_LastCarDateAuto" + monitorNumber, String.valueOf(carsAvto[0].getCarDateLong(0)));
             ed.commit();
+
+            if(carsAvto[0].getLenth() == 0 && carsAvito[0].getLenth() == 0)
+            {
+                toastErrorConnection.show();
+                return null;
+            }
 
             Cars cars = Cars.merge(carsAvto[0], carsAvito[0]);
             Bitmap LoadingImage = BitmapFactory.decodeResource(getResources(), R.drawable.res);

@@ -247,7 +247,8 @@
                 android:paddingLeft="10dp"
                 android:paddingTop="2dp"
                 android:paddingRight="10dp"
-                android:paddingBottom="2dp" />
+                android:paddingBottom="2dp"
+                android:textAlignment="viewEnd" />
 
         </LinearLayout>
     </ScrollView>
