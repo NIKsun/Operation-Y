@@ -37,6 +37,9 @@
         <activity android:name=".NotificationActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
         </activity>
 
         <service

@@ -560,8 +560,9 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
         dialogPicker.setContentView(R.layout.number_picker);
 
         final NumberPicker np1 = (NumberPicker) dialogPicker.findViewById(R.id.numberPicker1);
+        np1.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         final NumberPicker np2 = (NumberPicker) dialogPicker.findViewById(R.id.numberPicker2);
-
+        np2.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         String oldYear1 = String.valueOf(sPref.getInt("StartYear", 2010));
         String oldYear2 = String.valueOf(sPref.getInt("EndYear", 2015));
@@ -632,6 +633,9 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
 
         final NumberPicker np1 = (NumberPicker) dialogPicker.findViewById(R.id.numberPicker1);
         final NumberPicker np2 = (NumberPicker) dialogPicker.findViewById(R.id.numberPicker2);
+
+        np2.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        np1.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
 
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         String oldPrice1 = String.valueOf(sPref.getInt("StartPrice", 2010));
@@ -716,6 +720,8 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
         final NumberPicker np1 = (NumberPicker) dialogPicker.findViewById(R.id.numberPicker1);
         final NumberPicker np2 = (NumberPicker) dialogPicker.findViewById(R.id.numberPicker2);
 
+        np2.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        np1.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
 
 
         final String[] value_arr = new String[]{"0.0","0.6","0.7","0.8","0.9","1.0","1.1","1.2","1.3","1.4","1.5","1.6","1.7","1.8","1.9","2.0","2.1","2.2","2.3","2.4","2.5","2.6","2.7","2.8","2.9","3.0","3.1","3.2","3.3","3.4","3.5","4.0","4.5","5.0","5.5","6.0","6.0+"};
@@ -771,6 +777,8 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
         int oldProbeg = sPref.getInt("Probeg", 61);
 
         final NumberPicker np1 = (NumberPicker) dialogPicker.findViewById(R.id.onenumberPicker);
+
+        np1.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         final String[] probeg_arr = new String[]{"0","5","10","15","20","25","30","35","40","45","50","55", "60", "65", "70","75","80","85","90","95","100","110","120","130","140","150","160","170","180","190","200","210","220","230","240","250","260","270","280","290","300","310","320","330","340","350","360","370","380","390","400","410","420","430","440","450","460","470","480","490","500","500+"};
         np1.setMinValue(1);
         np1.setMaxValue(probeg_arr.length);

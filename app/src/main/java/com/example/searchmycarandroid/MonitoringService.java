@@ -160,7 +160,6 @@ public class MonitoringService extends Service {
 
                         }
                         if(isConnected && isConnectedAvito) {
-                            Log.i("Monitor", String.valueOf(serviceID));
                             isSuccess[0] = true;
                         }
                     }
@@ -187,7 +186,7 @@ public class MonitoringService extends Service {
 
         String shrtMessage = "";
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-        if(!sPref.getString("SearchMyCarService_shortMessage3","###").equals("###"))
+        if(!sPref.getString("SearchMyCarService_shortMessage"+serviceID,"###").equals("###"))
             shrtMessage = sPref.getString("SearchMyCarService_shortMessage"+serviceID,"###");
         else
             shrtMessage = "авто";
