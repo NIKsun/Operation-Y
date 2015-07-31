@@ -69,7 +69,7 @@ public class MonitoringService extends Service {
     }
 
 
-    void ServiceProcess(int serviceID, final String requestAvito, final String requestAuto) throws InterruptedException {
+    void ServiceProcess(final int serviceID, final String requestAvito, final String requestAuto) throws InterruptedException {
         while (true) {
 
             SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
@@ -89,59 +89,60 @@ public class MonitoringService extends Service {
             final String lastCarDateAvito = sPref.getString("SearchMyCarService_LastCarDateAvito" + serviceID, "###");
             final int[] counter = {0};
 
-            Thread t = new Thread(new Runnable() {
-                @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-                public void run() {
-                    Document doc = null;
-                    Elements mainElems;
-                    boolean isConnected = true, isConnectedAvito = true;
-                    if(!requestAuto.equals("###")) {
-                        try {
-                            doc = Jsoup.connect(requestAuto).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").timeout(12000).get();
-                        } catch (IOException e) {
-                            isConnected = false;
-                        }
-                        if(isConnected) {
-                            mainElems = doc.select("body > div.branding_fix > div.content.content_style > article > div.clearfix > div.b-page-wrapper > div.b-page-content").first().children();
+            int tryCounter = 0;
+            final boolean[] isSuccess = {false};
+            while(!isSuccess[0] && tryCounter < 3) {
+                Thread t = new Thread(new Runnable() {
+                    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+                    public void run() {
+                        counter[0] = 0;
+                        Document doc = null;
+                        Elements mainElems;
+                        boolean isConnected = true, isConnectedAvito = true;
+                        if(!requestAuto.equals("###")) {
+                            try {
+                                doc = Jsoup.connect(requestAuto).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").timeout(12000).get();
+                            } catch (IOException e) {
+                                isConnected = false;
+                            }
+                            if(isConnected) {
+                                mainElems = doc.select("body > div.branding_fix > div.content.content_style > article > div.clearfix > div.b-page-wrapper > div.b-page-content").first().children();
 
-                            Elements listOfCars = null;
-                            for (int i = 0; i < mainElems.size(); i++) {
-                                String className = mainElems.get(i).className();
-                                if ((className.indexOf("widget widget_theme_white sales-list") == 0) && (className.length() == 36)) {
-                                    listOfCars = mainElems.get(i).select("div.sales-list-item");
-                                    break;
-                                }
-                            }
-                            if (listOfCars != null) {
-                                Date buf;
-                                if (lastCarDateAuto.equals("###")) {
-                                    for (int i = 0; i < listOfCars.size(); i++) {
-                                        buf = Cars.getDateAuto(listOfCars.get(i).select("table > tbody > tr").first());
-                                        if (buf != null)
-                                            counter[0]++;
+                                Elements listOfCars = null;
+                                for (int i = 0; i < mainElems.size(); i++) {
+                                    String className = mainElems.get(i).className();
+                                    if ((className.indexOf("widget widget_theme_white sales-list") == 0) && (className.length() == 36)) {
+                                        listOfCars = mainElems.get(i).select("div.sales-list-item");
+                                        break;
                                     }
-                                } else {
-                                    for (int i = 0; i < listOfCars.size(); i++) {
-                                        buf = Cars.getDateAuto(listOfCars.get(i).select("table > tbody > tr").first());
-                                        if (buf != null && Long.parseLong(lastCarDateAuto) < buf.getTime())
-                                            counter[0]++;
+                                }
+                                if (listOfCars != null) {
+                                    Date buf;
+                                    if (lastCarDateAuto.equals("###")) {
+                                        for (int i = 0; i < listOfCars.size(); i++) {
+                                            buf = Cars.getDateAuto(listOfCars.get(i).select("table > tbody > tr").first());
+                                            if (buf != null)
+                                                counter[0]++;
+                                        }
+                                    } else {
+                                        for (int i = 0; i < listOfCars.size(); i++) {
+                                            buf = Cars.getDateAuto(listOfCars.get(i).select("table > tbody > tr").first());
+                                            if (buf != null && Long.parseLong(lastCarDateAuto)/1000 < buf.getTime()/1000)
+                                                counter[0]++;
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                    Log.i("Monitor1", String.valueOf(counter[0]));
-                    if(!requestAvito.equals("###")) {
-                        try {
-                            doc = Jsoup.connect(requestAvito).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").timeout(12000).get();
-                        } catch (Exception e) {
-                            Log.i("Monitor", "error3");
-                            if(isConnected)
-                                isConnectedAvito = false;
-                            else
-                                return;
-                        }
-                        if(isConnectedAvito) {
+                        if(!requestAvito.equals("###")) {
+                            try {
+                                doc = Jsoup.connect(requestAvito).userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6").timeout(12000).get();
+                            } catch (Exception e) {
+                                if(isConnected)
+                                    isConnectedAvito = false;
+                                else
+                                    return;
+                            }
                             mainElems = doc.select("#catalog > div.layout-internal.col-12.js-autosuggest__search-list-container > div.l-content.clearfix > div.clearfix > div.catalog.catalog_table > div.catalog-list.clearfix").first().children();
 
                             if (lastCarDateAvito.equals("###")) {
@@ -151,16 +152,22 @@ public class MonitoringService extends Service {
                             } else {
                                 for (int i = 0; i < mainElems.size(); i++)
                                     for (int j = 0; j < mainElems.get(i).children().size(); j++) {
-                                        if (Long.parseLong(lastCarDateAvito) < Cars.getDateAvito(mainElems.get(i).children().get(j)).getTime())
+                                        if (Long.parseLong(lastCarDateAvito)/1000 < Cars.getDateAvito(mainElems.get(i).children().get(j)).getTime()/1000)
                                             counter[0]++;
                                     }
                             }
+
+                        }
+                        if(isConnected && isConnectedAvito) {
+                            Log.i("Monitor", String.valueOf(serviceID));
+                            isSuccess[0] = true;
                         }
                     }
-                }
-            });
-            t.start();
-            while (t.isAlive());
+                });
+                t.start();
+                while (t.isAlive());
+                tryCounter ++;
+            }
             if(counter[0] != 0) {
                 sendNotification(counter[0], serviceID);
             }
@@ -169,21 +176,25 @@ public class MonitoringService extends Service {
     }
 
     void sendNotification(int countOfNewCars, int serviceID) {
-
-
-        Log.i("MonitorNotif", String.valueOf(serviceID));
         Notification notif = new Notification(R.drawable.status_bar, "Новое авто!",
                 System.currentTimeMillis());
 
         Intent intent = new Intent(this, NotificationActivity.class);
         intent.putExtra("NotificationMessage", serviceID);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pIntent = PendingIntent.getActivity(this, serviceID, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        String shrtMessage = "";
+        SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
+        if(!sPref.getString("SearchMyCarService_shortMessage3","###").equals("###"))
+            shrtMessage = sPref.getString("SearchMyCarService_shortMessage"+serviceID,"###");
+        else
+            shrtMessage = "авто";
 
         if(countOfNewCars == 1)
-            notif.setLatestEventInfo(this, "Монитор "+serviceID, "Найден "+countOfNewCars+" новый авто", pIntent);
+            notif.setLatestEventInfo(this, "Монитор "+serviceID, "Найден "+countOfNewCars+" новый "+shrtMessage, pIntent);
         else
-            notif.setLatestEventInfo(this, "Монитор "+serviceID, "Найдено "+countOfNewCars+" новых авто", pIntent);
+            notif.setLatestEventInfo(this, "Монитор "+serviceID, "Найдено "+countOfNewCars+" новых "+shrtMessage, pIntent);
         Uri ringURI = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         notif.number = countOfNewCars;
         notif.sound = ringURI;

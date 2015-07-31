@@ -36,9 +36,6 @@ public class ListViewAdapter extends BaseAdapter{
         isFromMonitor = true;
         inflater = ( LayoutInflater )context.
                 getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-        Log.i("DateTime3",this.lastCarDateAuto);
-        Log.i("DateTime3",this.lastCarDateAvito);
     }
     public ListViewAdapter(ListOfCars mainActivity, Cars c, Bitmap[] imgs) {
         // TODO Auto-generated constructor stub
@@ -86,9 +83,7 @@ public class ListViewAdapter extends BaseAdapter{
                 if(lastCarDateAuto.equals("###"))
                     rowView.setBackgroundColor(0xFFC1E1FF);
                 else {
-                    Log.i("DTime", String.valueOf(Long.parseLong(lastCarDateAuto)));
-                    Log.i("DTime", String.valueOf(cars.getCarDateLong(position)));
-                    if (Long.parseLong(lastCarDateAuto) < cars.getCarDateLong(position)) {//New cars
+                    if (Long.parseLong(lastCarDateAuto)/1000 < cars.getCarDateLong(position)/1000) {//New cars
                         rowView.setBackgroundColor(0xFFC1E1FF);
                     }
                 }
@@ -96,9 +91,7 @@ public class ListViewAdapter extends BaseAdapter{
                 if (lastCarDateAvito.equals("###"))
                     rowView.setBackgroundColor(0xFFC1E1FF);
                 else {
-                    Log.i("DTime", String.valueOf(Long.parseLong(lastCarDateAvito)));
-                    Log.i("DTime", String.valueOf(cars.getCarDateLong(position)));
-                    if (Long.parseLong(lastCarDateAvito) < cars.getCarDateLong(position)) {    //New cars
+                    if (Long.parseLong(lastCarDateAvito)/1000 < cars.getCarDateLong(position)/1000) {    //New cars
                         rowView.setBackgroundColor(0xFFC1E1FF);
                     }
                 }

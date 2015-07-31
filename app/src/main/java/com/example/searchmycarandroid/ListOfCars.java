@@ -79,7 +79,6 @@ public class ListOfCars extends Activity {
     protected void onDestroy() {
         loader.cancel(true);
         imageLoaderMayRunning = false;
-        Log.i("Rot", "now1");
         super.onDestroy();
     }
     @Override
@@ -181,8 +180,6 @@ public class ListOfCars extends Activity {
                 String[] newStatus = sPref.getString("SearchMyCarService_status", "").split(";");
                 newStatus[buttonNumber - 1] = "true";
                 ed.putString("SearchMyCarService_status", newStatus[0] + ";" + newStatus[1] + ";" + newStatus[2]);
-
-                Log.i("shMes",shortMessage);
                 ed.putString("SearchMyCarService_shortMessage" + buttonNumber, shortMessage);
                 ed.commit();
                 Intent serviceIntent = new Intent(ListOfCars.this, MonitoringService.class);

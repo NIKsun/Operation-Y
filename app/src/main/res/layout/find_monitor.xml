@@ -14,6 +14,7 @@
         <TextView
             android:id="@+id/tv_mon1_desc"
             android:layout_width="match_parent"
+            android:paddingLeft="5dp"
             android:textSize="20dp"
             android:layout_height="wrap_content" />
     </LinearLayout>
@@ -29,6 +30,7 @@
         <TextView
             android:id="@+id/tv_mon2_desc"
             android:textSize="20dp"
+            android:paddingLeft="5dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </LinearLayout>
@@ -45,6 +47,7 @@
             android:id="@+id/tv_mon3_desc"
             android:textSize="20dp"
             android:layout_width="match_parent"
+            android:paddingLeft="5dp"
             android:layout_height="wrap_content" /></LinearLayout>
 
 </LinearLayout>

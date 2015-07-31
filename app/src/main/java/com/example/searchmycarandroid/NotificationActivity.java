@@ -46,7 +46,7 @@ import java.util.List;
 
 
 public class NotificationActivity extends Activity {
-    Toast toastErrorConnection, toastErrorCarList;
+    Toast toastErrorConnection, toastErrorCarList, toastErrorConnectionAuto,toastErrorConnectionAvito;
     String lastCarDateAvito, lastCarDateAuto;
     int monitorNumber;
     LoadListViewMonitor loader = new LoadListViewMonitor();
@@ -80,7 +80,6 @@ public class NotificationActivity extends Activity {
         imageLoaderMayRunning = false;
         super.onDestroy();
         monitorNumber = intent.getIntExtra("NotificationMessage", 0);
-        Log.i("111111111111111111111111", String.valueOf(monitorNumber));
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         String requestAuto = sPref.getString("SearchMyCarServiceRequestAuto" + monitorNumber, "");
         String requestAvito = sPref.getString("SearchMyCarServiceRequestAvito" + monitorNumber, "");
@@ -122,7 +121,6 @@ public class NotificationActivity extends Activity {
     protected void onDestroy() {
         loader.cancel(true);
         imageLoaderMayRunning = false;
-        Log.i("Rot","now2");
         super.onDestroy();
     }
     @Override
@@ -139,12 +137,15 @@ public class NotificationActivity extends Activity {
 
         toastErrorConnection = Toast.makeText(getApplicationContext(),
                 "Связь с сервером не установлена :(", Toast.LENGTH_SHORT);
+        toastErrorConnectionAvito = Toast.makeText(getApplicationContext(),
+                "Не удалось загрузить списко автомобилей Avito", Toast.LENGTH_SHORT);
+        toastErrorConnectionAuto = Toast.makeText(getApplicationContext(),
+                "Не удалось загрузить списко автомобилей Auto.ru", Toast.LENGTH_SHORT);
         toastErrorCarList = Toast.makeText(getApplicationContext(),
                 "По вашему запросу ничего не найдено", Toast.LENGTH_SHORT);
 
         monitorNumber = getIntent().getIntExtra("NotificationMessage", 0);
 
-        Log.i("111111111111111111111111", String.valueOf(monitorNumber));
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         String requestAuto = sPref.getString("SearchMyCarServiceRequestAuto" + monitorNumber, "");
         String requestAvito = sPref.getString("SearchMyCarServiceRequestAvito" + monitorNumber, "");
@@ -303,6 +304,10 @@ public class NotificationActivity extends Activity {
                 toastErrorConnection.show();
                 return null;
             }
+            if(!connectionAvitoSuccess[0])
+                toastErrorConnectionAvito.show();
+            if(!connectionAutoSuccess)
+                toastErrorConnectionAuto.show();
             publishProgress("Загрузка с Avito.ru");
             while (threadAvito.isAlive()); //waiting
             publishProgress("Подготовка результата");

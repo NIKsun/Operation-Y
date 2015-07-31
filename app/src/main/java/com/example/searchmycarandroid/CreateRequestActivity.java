@@ -410,10 +410,8 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 String requestavito = "###";
                 if(!(marka.equals("/###")) && !(model.equals("/###")))
                     requestauto = begin + marka + model + end + year1 + startYear.toString() + year2 + endYear.toString() + price1 + price2+photo+eng_vol1+volume_arr_avto[startVolume]+eng_vol2+volume_arr_avto[endVolume]+probeg+body_avto_req+privod_avto_req+trans_avto_req+engine_avto_req;
-                Log.i("Hello", requestauto);
                 if(!(markaavito.equals("/###")) && !(modelavito.equals("/###")) && isUseSearchInAvito)
                     requestavito = begin_avito+markaavito+modelavito+"/?"+photoa+price1a+startPrice+price2a+endPrice+"&f="+year1a+startYearAvito+year2a+endYearAvito+"."+eng_vol1a+volume_arr_avito[startVolume]+eng_vol2a+volume_arr_avito[endVolume]+"."+probega+body_avito_req+privod_avito_req+trans_avito_req+engine_avito_req;
-                Log.i("Hello", requestavito);
                 ed.putString("SearchMyCarRequest", requestauto);
                 ed.putString("SearchMyCarRequestAvito", requestavito);
 
@@ -1230,7 +1228,6 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
             butMonTitle3.setText(Html.fromHtml("Монитор 3 <font color=#D05555 face=cursive>(выключен)</font>"));
         }
 
-        Log.i("shMes",sPref.getString("SearchMyCarService_shortMessage1","###"));
         TextView tvDesc1 = (TextView) dialog.findViewById(R.id.tv_mon1_desc);
         if(!sPref.getString("SearchMyCarService_shortMessage1","###").equals("###"))
             tvDesc1.setText(sPref.getString("SearchMyCarService_shortMessage1", "###"));
