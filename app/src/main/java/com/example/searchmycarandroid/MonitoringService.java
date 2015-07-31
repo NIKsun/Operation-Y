@@ -130,6 +130,7 @@ public class MonitoringService extends Service {
                                             if (buf != null && Long.parseLong(lastCarDateAuto)/1000 < buf.getTime()/1000)
                                                 counter[0]++;
                                         }
+
                                     }
                                 }
                             }
