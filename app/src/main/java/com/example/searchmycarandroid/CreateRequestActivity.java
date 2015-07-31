@@ -361,6 +361,8 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 //get mark
                 String marka = "";
                 String markaavito = "";
+                String marka_for_dialog = "###";
+
                 if(!posMarkString.equals("Любая")) {
                     Cursor cursorMark = db.query("marksTable", null, "markauser=?", new String[]{posMarkString}, null, null, null);
                     cursorMark.moveToFirst();
@@ -372,6 +374,7 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 //get model
                 String model = "";
                 String modelavito = "";
+                String model_for_dialog = "###";
                 if(!posModelString.equals("Любая")) {
                     Cursor cursorModel = db.query("modelsTable", null, "modeluser=?", new String[]{posModelString}, null, null, null);
                     cursorModel.moveToFirst();
