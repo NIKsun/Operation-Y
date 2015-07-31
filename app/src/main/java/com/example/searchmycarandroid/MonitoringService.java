@@ -123,7 +123,7 @@ public class MonitoringService extends Service {
                                 } else {
                                     for (int i = 0; i < listOfCars.size(); i++) {
                                         buf = Cars.getDateAuto(listOfCars.get(i).select("table > tbody > tr").first());
-                                        if (buf != null && Date.parse(lastCarDateAuto) < Date.parse(buf.toString()))
+                                        if (buf != null && Long.parseLong(lastCarDateAuto) < buf.getTime())
                                             counter[0]++;
                                     }
                                 }
@@ -151,7 +151,7 @@ public class MonitoringService extends Service {
                             } else {
                                 for (int i = 0; i < mainElems.size(); i++)
                                     for (int j = 0; j < mainElems.get(i).children().size(); j++) {
-                                        if (Date.parse(lastCarDateAvito) < Date.parse(Cars.getDateAvito(mainElems.get(i).children().get(j)).toString()))
+                                        if (Long.parseLong(lastCarDateAvito) < Cars.getDateAvito(mainElems.get(i).children().get(j)).getTime())
                                             counter[0]++;
                                     }
                             }

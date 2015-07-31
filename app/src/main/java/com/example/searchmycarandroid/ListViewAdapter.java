@@ -86,18 +86,16 @@ public class ListViewAdapter extends BaseAdapter{
                 if(lastCarDateAuto.equals("###"))
                     rowView.setBackgroundColor(0xFFC1E1FF);
                 else
-                    if (Date.parse(lastCarDateAuto) < Date.parse(cars.getCarDateString(position))) {//New cars
+                    if (Long.parseLong(lastCarDateAuto) < cars.getCarDateLong(position)) {//New cars
                         rowView.setBackgroundColor(0xFFC1E1FF);
-                        Log.i("DateTime34", String.valueOf(cars.getCarDateString(position)));
                     }
             }
             else {
                 if(lastCarDateAvito.equals("###"))
                     rowView.setBackgroundColor(0xFFC1E1FF);
                 else
-                    if (Date.parse(lastCarDateAvito) < Date.parse(cars.getCarDateString(position))) {    //New cars
+                    if (Long.parseLong(lastCarDateAvito) < cars.getCarDateLong(position)) {    //New cars
                         rowView.setBackgroundColor(0xFFC1E1FF);
-                        Log.i("DateTime34", String.valueOf(cars.getCarDateString(position)));
                     }
             }
         }

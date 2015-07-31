@@ -344,11 +344,17 @@ public class ListOfCars extends Activity {
             if(!bulAvito[0] || !connectionAvitoSuccess[0])
                 carsAvito[0] = new Cars(0);
             else
-                lastCarDateAvito = carsAvito[0].getCarDateString(0);
+                lastCarDateAvito = String.valueOf(carsAvito[0].getCarDateLong(0));
             if(!bulAvto || !connectionAutoSuccess)
                 carsAvto[0] = new Cars(0);
             else
-                lastCarDateAuto = carsAvto[0].getCarDateString(0);
+                lastCarDateAuto = String.valueOf(carsAvto[0].getCarDateLong(0));
+
+            if(carsAvto[0].getLenth() == 0 && carsAvito[0].getLenth() == 0)
+            {
+                toastErrorConnection.show();
+                return null;
+            }
 
             Cars cars = Cars.merge(carsAvto[0], carsAvito[0]);
             Bitmap LoadingImage = BitmapFactory.decodeResource(getResources(), R.drawable.res);

@@ -107,10 +107,10 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
         {
 //nen
 
-            Integer posMark = sPref.getInt("SelectedMark", 0);
-            if(posMark==0)
+            String posMark = sPref.getString("SelectedMark", "Любая");
+            if(posMark.equals("Любая"))
             {
-                sPref.edit().putInt("SelectedModel", 0).commit();
+                sPref.edit().putString("SelectedModel", "Любая").commit();
                 b.setText("Марка");
                 b1.setText("Модель");
                 Button b5 = (Button) findViewById(R.id.clear_marka);
@@ -119,12 +119,7 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
             else{
                 SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-
-                Cursor cursorMark = db.query("marksTable", null, "id=?", new String[]{posMark.toString()}, null, null, null);
-                cursorMark.moveToFirst();
-                String marka = cursorMark.getString(cursorMark.getColumnIndex("markauser"));
-
-                b.setText(marka);
+                b.setText(posMark);
 
                 Button b3 = (Button) findViewById(R.id.clear_marka);
                 b3.setVisibility(View.VISIBLE);
@@ -133,24 +128,14 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 {
 
 //nen
-                    Integer posModel = sPref.getInt("SelectedModel", 0);
-                    if(posModel==0){
+                    String  posModel = sPref.getString("SelectedModel", "Любая");
+                    if(posModel.equals("Любая")){
                         b1.setText("Модель");
                         Button b5 = (Button) findViewById(R.id.clear_model);
                         b5.setVisibility(View.INVISIBLE);
                     }
                     else{
-
-                        Cursor cursorModel = db.query("modelsTable", null, "marka_id=?", new String[]{posMark.toString()}, null, null, null);
-                        cursorModel.moveToFirst();
-                        int i = 1;
-                        while(i<posModel){
-                            cursorModel.moveToNext();
-                            ++i;
-                        }
-                        String model = cursorModel.getString(cursorModel.getColumnIndex("modeluser"));
-
-                        b1.setText(model);
+                        b1.setText(posModel);
                         Button b4 = (Button) findViewById(R.id.clear_model);
                         b4.setVisibility(View.VISIBLE);
                     }
@@ -372,30 +357,25 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
 
 
 //тут
-                Integer posMark = sPref.getInt("SelectedMark", 0);
-                Integer posModel = sPref.getInt("SelectedModel",0);
+                String posMarkString = sPref.getString("SelectedMark", "Любая");
+                String posModelString = sPref.getString("SelectedModel", "Любая" );
 
                 //get mark
                 String marka = "";
                 String markaavito = "";
-                if(posMark!=0) {
-                    Cursor cursorMark = db.query("marksTable", null, "id=?", new String[]{posMark.toString()}, null, null, null);
+                if(!posMarkString.equals("Любая")) {
+                    Cursor cursorMark = db.query("marksTable", null, "markauser=?", new String[]{posMarkString}, null, null, null);
                     cursorMark.moveToFirst();
+
                     marka = "/" + cursorMark.getString(cursorMark.getColumnIndex("markarequest"));
                     markaavito = "/" + cursorMark.getString(cursorMark.getColumnIndex("markarequestavito"));
                 }
                 //get model
                 String model = "";
                 String modelavito = "";
-                if(posModel!=0) {
-                    Cursor cursorModel = db.query("modelsTable", null, "marka_id=?", new String[]{posMark.toString()}, null, null, null);
+                if(!posModelString.equals("Любая")) {
+                    Cursor cursorModel = db.query("modelsTable", null, "modeluser=?", new String[]{posModelString}, null, null, null);
                     cursorModel.moveToFirst();
-                    int i = 1;
-                    while (i < posModel) {
-                        cursorModel.moveToNext();
-                        ++i;
-                    }
-
                     model = "/" + cursorModel.getString(cursorModel.getColumnIndex("modelrequest"));
                     modelavito = "/" + cursorModel.getString(cursorModel.getColumnIndex("modelrequestavito"));
                 }
@@ -422,7 +402,7 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
 
                 //clear model
                 sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-                sPref.edit().putInt("SelectedModel", 0).commit();
+                sPref.edit().putString("SelectedModel", "Любая").commit();
 
                 Cursor cursor = db.query("marksTable", null, null, null, null, null, null);
                 String strToParse = "Любая@@@";
@@ -443,13 +423,18 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
 
                 SharedPreferences sPref2 = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
 //тут
-                Integer pos = sPref2.getInt("SelectedMark",0);
-                if(pos==0){
+                String pos = sPref2.getString("SelectedMark", "Любая");
+                if(pos.equals("Любая")){
                     Toast t = Toast.makeText(getApplicationContext(),"Для начала выберите марку",Toast.LENGTH_SHORT);
                     t.show();
                     break;
                 }
-                Cursor cursor2 = db.query("modelsTable", null, "marka_id=?", new String[]{pos.toString()}, null, null, null);
+
+                Cursor cursor3 = db.query("marksTable", null, "markauser=?", new String[]{pos}, null, null, null);
+                cursor3.moveToFirst();
+                Integer markId = cursor3.getColumnIndex("id");
+                String markIdValue = cursor3.getString(markId);
+                Cursor cursor2 = db.query("modelsTable", null, "marka_id=?", new String[]{markIdValue}, null, null, null);
                 String strToParse2 = "Любая@@@";
 
                 if (cursor2.moveToFirst()) {
@@ -1114,8 +1099,8 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 b2 = (Button) findViewById(R.id.marka_button);
                 b2.setText("Марка");
 
-                sPref.edit().putInt("SelectedMark", 0).commit();
-                sPref.edit().putInt("SelectedModel", 0).commit();
+                sPref.edit().putString("SelectedMark", "Любая").commit();
+                sPref.edit().putString("SelectedModel", "Любая").commit();
 
                 b3 = (Button) findViewById(R.id.clear_marka);
                 b3.setVisibility(View.INVISIBLE);
@@ -1123,7 +1108,7 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                 b2 = (Button) findViewById(R.id.model_button);
                 b2.setText("Модель");
 
-                sPref.edit().putInt("SelectedModel", 0).commit();
+                sPref.edit().putString("SelectedModel", "Любая").commit();
 
                 b3 = (Button) findViewById(R.id.clear_model);
                 b3.setVisibility(View.INVISIBLE);
