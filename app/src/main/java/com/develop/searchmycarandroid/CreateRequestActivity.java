@@ -1,9 +1,10 @@
-package com.example.searchmycarandroid;
+package com.develop.searchmycarandroid;
 
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -77,25 +78,18 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
     @Override
     protected void onResume(){
         super.onResume();
-
-
-        ActivityManager am = (ActivityManager)this.getSystemService(ACTIVITY_SERVICE);
-        List<ActivityManager.RunningServiceInfo> rs = am.getRunningServices(1000);
-        Boolean serviceRunning = false;
-        for (int i=0; i<rs.size(); i++)
-        {
-            if(rs.get(i).service.getClassName().equals("com.example.searchmycarandroid.MonitoringService")) {
-                serviceRunning = true;
-                break;
-            }
-        }
+        super.onResume();
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-        if(!serviceRunning){
-            sPref.edit().putString("SearchMyCarService_status","false;false;false").commit();
-            sPref.edit().putString("SearchMyCarService_shortMessage1","###").commit();
-            sPref.edit().putString("SearchMyCarService_shortMessage2","###").commit();
-            sPref.edit().putString("SearchMyCarService_shortMessage3","###").commit();
-        }
+
+        Intent checkIntent = new Intent(getApplicationContext(), MonitoringWork.class);
+        Boolean alrarmIsActive = false;
+        for(int i=1;i<=3;i++)
+            if (PendingIntent.getService(getApplicationContext(), i, checkIntent, PendingIntent.FLAG_NO_CREATE) != null)
+                alrarmIsActive = true;
+
+        if(!alrarmIsActive)
+            sPref.edit().putString("SearchMyCarService_status", "false;false;false").commit();
+
         isUseSearchInAvito = sPref.getBoolean("isUseSearchInAvito",true);
 
 
@@ -1197,7 +1191,7 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
         dialog.setContentView(R.layout.find_monitor);
 
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-        String status = sPref.getString("SearchMyCarService_status", "");
+        String status = sPref.getString("SearchMyCarService_status", "false;false;false");
         final String[] stat = status.split(";");
 
         Button butMonTitle1 = (Button) dialog.findViewById(R.id.bot_mon1_title);
@@ -1250,6 +1244,7 @@ public class CreateRequestActivity extends Activity implements OnClickListener {
                     intent.putExtra("NotificationMessage", monitorNumber);
                     startActivity(intent);
                 }
+                dialog.dismiss();
             }
         };
         butMonTitle1.setOnClickListener(monitorClick);

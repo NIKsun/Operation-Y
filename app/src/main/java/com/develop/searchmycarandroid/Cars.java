@@ -1,21 +1,13 @@
-package com.example.searchmycarandroid;
+package com.develop.searchmycarandroid;
 
 import android.annotation.TargetApi;
 import android.os.Build;
-import android.provider.ContactsContract;
-import android.support.annotation.NonNull;
-import android.util.Log;
 
 import org.jsoup.nodes.Element;
 
-import java.security.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,16 +51,17 @@ public class Cars {
         if(elem == null){
             return false;
         }
-        Pattern pattern = Pattern.compile("card_id\":\"([0-9]+).+created\":\"([^\"]+)");
+        Pattern pattern = Pattern.compile("card_id\":\"([0-9]+).+created\":([^,]+)");
         Matcher matcher = pattern.matcher(elem.attr("data-stat_params"));
         if(matcher.find()){
             currentCar.id = matcher.group(1);
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            try {
-                currentCar.timeOfCreate = format.parse(matcher.group(2));
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
+            //SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            //try {
+                //currentCar.timeOfCreate = format.parse(matcher.group(2));
+                currentCar.timeOfCreate = new Date(Long.parseLong(matcher.group(2)));
+            //} catch (ParseException e) {
+            //    e.printStackTrace();
+           // }
         }
         else
             return false;
@@ -96,17 +89,18 @@ public class Cars {
         if(elem == null){
             return null;
         }
-        Pattern pattern = Pattern.compile("created\":\"([^\"]+)");
+        Pattern pattern = Pattern.compile("created\":([^,]+)");
         Matcher matcher = pattern.matcher(elem.attr("data-stat_params"));
         if(matcher.find()){
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            try {
-                Date buf = format.parse(matcher.group(1));
+            //SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            //try {
+            //    Date buf = format.parse(matcher.group(1));
+                Date buf = new Date(Long.parseLong(matcher.group(1)));
                 buf.setSeconds(0);
                 return buf;
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
+            //} catch (ParseException e) {
+            //    e.printStackTrace();
+            //}
         }
         return null;
     }

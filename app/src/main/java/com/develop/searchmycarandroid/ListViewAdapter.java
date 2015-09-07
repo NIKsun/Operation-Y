@@ -1,12 +1,9 @@
-package com.example.searchmycarandroid;
+package com.develop.searchmycarandroid;
 
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.net.Uri;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -16,7 +13,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class ListViewAdapter extends BaseAdapter{
     Context context;

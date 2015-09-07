@@ -1,4 +1,4 @@
-package com.example.searchmycarandroid;
+package com.develop.searchmycarandroid;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

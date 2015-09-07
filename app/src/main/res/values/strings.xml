@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SearchMyCarAndroid</string>
+    <string name="app_name">АвтоМосква</string>
 
     <string name="dummy_button">Поиск</string>
     <string name="dummy_content">Auto.ru\nHelper</string>

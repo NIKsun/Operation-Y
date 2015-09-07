@@ -1,9 +1,10 @@
-package com.example.searchmycarandroid;
+package com.develop.searchmycarandroid;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.ActivityManager;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -14,14 +15,10 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.BoringLayout;
-import android.text.Html;
-import android.util.Log;
+import android.os.SystemClock;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
@@ -35,14 +32,7 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.ConnectException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.URL;
-import java.net.UnknownHostException;
-import java.sql.Connection;
-import java.util.List;
 
 
 public class NotificationActivity extends Activity {
@@ -52,6 +42,7 @@ public class NotificationActivity extends Activity {
     LoadListViewMonitor loader = new LoadListViewMonitor();
     Boolean imageLoaderMayRunning;
     Thread imageLoader = null;
+    AlarmManager am;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -111,6 +102,12 @@ public class NotificationActivity extends Activity {
                     public void onStopTrackingTouch(SeekBar seekBar) {
                         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
                         sPref.edit().putInt("SearchMyCarService_period" + monitorNumber, progress).commit();
+
+                        Intent serviceIntent = new Intent(getApplicationContext(), MonitoringWork.class);
+                        serviceIntent.putExtra("SearchMyCarService_serviceID", monitorNumber);
+                        PendingIntent pIntent = PendingIntent.getService(getApplicationContext(), monitorNumber, serviceIntent, 0);
+                        am.setRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + (progress+4)*60000, (progress+4)*60000, pIntent);
+
                         Toast.makeText(getApplicationContext(), "Новый период мониторинга установлен", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -134,6 +131,7 @@ public class NotificationActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.monitor_list_of_cars);
 
+        am = (AlarmManager) getSystemService(ALARM_SERVICE);
 
         toastErrorConnection = Toast.makeText(getApplicationContext(),
                 "Связь с сервером не установлена :(", Toast.LENGTH_SHORT);
@@ -176,6 +174,12 @@ public class NotificationActivity extends Activity {
                     public void onStopTrackingTouch(SeekBar seekBar) {
                         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
                         sPref.edit().putInt("SearchMyCarService_period"+monitorNumber,progress).commit();
+
+                        Intent serviceIntent = new Intent(getApplicationContext(), MonitoringWork.class);
+                        serviceIntent.putExtra("SearchMyCarService_serviceID", monitorNumber);
+                        PendingIntent pIntent = PendingIntent.getService(getApplicationContext(), monitorNumber, serviceIntent, 0);
+                        am.setRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + (progress + 4) * 60000, (progress + 4) * 60000, pIntent);
+
                         Toast.makeText(getApplicationContext(),"Новый период установлен",Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -198,6 +202,9 @@ public class NotificationActivity extends Activity {
                 sPref.edit().putString("SearchMyCarService_shortMessage" + monitorNumber, "###");
                 sPref.edit().putString("SearchMyCarService_status", newStatus[0] + ";" + newStatus[1] + ";" + newStatus[2]).commit();
                 Toast.makeText(NotificationActivity.this, "Монитор " + monitorNumber + " остановлен", Toast.LENGTH_LONG).show();
+                Intent serviceIntent = new Intent(getApplicationContext(), MonitoringWork.class);
+                PendingIntent pIntent = PendingIntent.getService(getApplicationContext(), monitorNumber, serviceIntent, 0);
+                am.cancel(pIntent);
                 finish();
             }
         });

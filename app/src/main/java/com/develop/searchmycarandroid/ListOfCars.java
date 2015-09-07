@@ -1,9 +1,11 @@
-package com.example.searchmycarandroid;
+package com.develop.searchmycarandroid;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -14,13 +16,11 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.BoringLayout;
+import android.os.SystemClock;
 import android.text.Html;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -34,13 +34,7 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.ConnectException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.URL;
-import java.net.UnknownHostException;
-import java.sql.Connection;
 import java.util.List;
 
 
@@ -51,6 +45,7 @@ public class ListOfCars extends Activity {
     Boolean isListDownloading, imageLoaderMayRunning;
     LoadListView loader = new LoadListView();
     Thread imageLoader = null;
+    AlarmManager am;
 
 
     @Override
@@ -90,26 +85,10 @@ public class ListOfCars extends Activity {
     @Override
     protected void onResume(){
         super.onResume();
-        ActivityManager am = (ActivityManager)this.getSystemService(ACTIVITY_SERVICE);
-        List<ActivityManager.RunningServiceInfo> rs = am.getRunningServices(1000);
-        Boolean serviceRunning = false;
-        for (int i=0; i<rs.size(); i++)
-        {
-            if(rs.get(i).service.getClassName().equals("com.example.searchmycarandroid.MonitoringService")) {
-                serviceRunning = true;
-                break;
-            }
-        }
 
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
-        String status = sPref.getString("SearchMyCarService_status", "");
-        String[] stat;
-        if(serviceRunning)
-            stat = status.split(";");
-        else{
-            stat = new String[]{"false","false","false"};
-            sPref.edit().putString("SearchMyCarService_status","false;false;false").commit();
-        }
+        String status = sPref.getString("SearchMyCarService_status", "false;false;false");
+        String[] stat = status.split(";");
 
         Button b1 = (Button) findViewById(R.id.buttonMonitor1);
         Button b2 = (Button) findViewById(R.id.buttonMonitor2);
@@ -138,6 +117,8 @@ public class ListOfCars extends Activity {
         toastErrorCarList = Toast.makeText(getApplicationContext(),
                 "По вашему запросу ничего не найдено", Toast.LENGTH_SHORT);
 
+
+        am = (AlarmManager) getSystemService(ALARM_SERVICE);
 
         SharedPreferences sPref = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE);
         requestAuto = sPref.getString("SearchMyCarRequest", "");
@@ -177,15 +158,22 @@ public class ListOfCars extends Activity {
                 else
                     ed.putString("SearchMyCarService_LastCarDateAuto" + buttonNumber, lastCarDateAuto);
                 ed.putInt("SearchMyCarService_period" + buttonNumber, 0);
-                String[] newStatus = sPref.getString("SearchMyCarService_status", "").split(";");
+                String[] newStatus = sPref.getString("SearchMyCarService_status", "false;false;false").split(";");
                 newStatus[buttonNumber - 1] = "true";
                 ed.putString("SearchMyCarService_status", newStatus[0] + ";" + newStatus[1] + ";" + newStatus[2]);
                 ed.putString("SearchMyCarService_shortMessage" + buttonNumber, shortMessage);
                 ed.commit();
+                /*
                 Intent serviceIntent = new Intent(ListOfCars.this, MonitoringService.class);
                 serviceIntent.putExtra("SearchMyCarService_serviceID", buttonNumber);
-                serviceIntent.putExtra("SearchMyCarService_command", "start");
                 startService(serviceIntent);
+                */
+
+                Intent serviceIntent = new Intent(getApplicationContext(), MonitoringWork.class);
+                serviceIntent.putExtra("SearchMyCarService_serviceID", buttonNumber);
+                PendingIntent pIntent = PendingIntent.getService(getApplicationContext(), buttonNumber, serviceIntent, 0);
+                am.setRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 240000, 240000, pIntent);
+
                 switch (buttonNumber) {
                     case 1:
                         Button b1 = (Button) findViewById(R.id.buttonMonitor1);
@@ -215,7 +203,7 @@ public class ListOfCars extends Activity {
             }
         });
 
-        String[] status = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE).getString("SearchMyCarService_status", "").split(";");
+        String[] status = getSharedPreferences("SearchMyCarPreferences", Context.MODE_PRIVATE).getString("SearchMyCarService_status", "false;false;false").split(";");
 
 
         Intent intent = new Intent(ListOfCars.this, NotificationActivity.class);
